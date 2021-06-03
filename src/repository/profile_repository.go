@@ -56,7 +56,7 @@ func (p *profileRepository) GetAllUserProfiles(ctx context.Context) ([]domain.Pr
 	_, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	profiles , err := p.collection.Find(ctx, bson.M{"type" : enum.ProfileType(0).String()})
+	profiles , err := p.collection.Find(ctx, bson.M{"type" : enum.ProfileType(0)})
 	if err != nil {
 		return nil, err
 	}

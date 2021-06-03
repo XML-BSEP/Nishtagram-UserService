@@ -1,17 +1,21 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
+	router2 "user-service/http/router"
 	"user-service/infrastructure/mongo"
 	"user-service/infrastructure/seeder"
+	interactor2 "user-service/interactor"
 )
 
 func main() {
 
 	mongoCli, ctx := mongo.NewMongoClient()
 	db := mongo.GetDbName()
-	println(db)
 	seeder.SeedData(db, mongoCli, ctx)
-	g := gin.Default()
-	g.Run("localhost:8082")
+
+	interactor := interactor2.NewInteractor(mongoCli)
+	appHandler := interactor.NewAppHandler()
+
+	router := router2.NewRouter(appHandler)
+	router.Run("localhost:8082")
 }

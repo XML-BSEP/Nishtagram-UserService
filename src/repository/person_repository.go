@@ -1,6 +1,8 @@
 package repository
 
-import "go.mongodb.org/mongo-driver/mongo"
+import (
+	"go.mongodb.org/mongo-driver/mongo"
+)
 
 type personRepository struct {
 	collection *mongo.Collection
@@ -8,7 +10,6 @@ type personRepository struct {
 }
 
 type PersonRepository interface {
-
 }
 
 func NewPersonRepository(db *mongo.Client) PersonRepository {

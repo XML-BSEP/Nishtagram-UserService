@@ -50,10 +50,10 @@ func SeedData(db string, mongoCli *mongo.Client, ctx *context.Context) {
 
 func seedPerson(tags *mongo.Collection, ctx *context.Context) {
 	_, err := tags.InsertMany(*ctx, []interface{} {
-		bson.D{{"_id",  uuid2.New().String()},
+		bson.D{{"_id",  "123456789"},
 		{"name", "Pera"},
 		{"surname", "Peric"},
-		{"gender", enum.Gender.String(0)},
+		{"gender", enum.Gender(0)},
 		{"date_of_birth", time.Date( 1998, 06, 8, 20, 20, 20, 651387237, time.UTC)},
 		{"address","Bulevar Patrijarha Pavla 10, Novi Sad, Srbija"},
 		{"phone", "011/2112-2111"},
@@ -81,7 +81,7 @@ func seedProfile(tags *mongo.Collection, ctx *context.Context) {
 }
 
 func seedProfileInfo(tags *mongo.Collection, ctx *context.Context) {
-	person1 := domain.Person{ID: "08ee5e17-b572-4a39-9a05-85699b965d2a",
+	person1 := domain.Person{ID: "123456789",
 	Name: "Pera",
 	Surname: "Peric",
 	Gender: enum.Gender(0),
@@ -102,7 +102,7 @@ func seedProfileInfo(tags *mongo.Collection, ctx *context.Context) {
 			{"password", "$2y$12$haErHk8CNLaodc4rfEFwNeX5MRkXlfpeziRCimK025BJhFVlQmpIa"},
 			{"biography", "Ja sam kul osoba"},
 			{"web_page", "pera.com"},
-			{"category", enum.Category(6).String()},
+			{"category", enum.Category(6)},
 			{"profile_image", ""},
 			{"person", person1},
 			{"profile", profile1},
@@ -118,9 +118,9 @@ func seedReportUser(tags *mongo.Collection, ctx *context.Context) {
 	_, err := tags.InsertMany(*ctx, []interface{} {
 		bson.D{{"_id", uuid2.New().String()},
 			{"reported", "pera123"},
-			{"report_type", enum.UserReportType(0).String()},
+			{"report_type", enum.UserReportType(0)},
 			{"timestamp", time.Now()},
-			{"report_status", enum.ReportStatus(1).String()},
+			{"report_status", enum.ReportStatus(1)},
 		},
 	})
 
@@ -134,7 +134,7 @@ func seedRequestVerification(tags *mongo.Collection, ctx *context.Context) {
 		bson.D{{"_id", uuid2.New().String()},
 			{"name", "Pera"},
 			{"surname", "Peric"},
-			{"category", enum.Category(0).String()},
+			{"category", enum.Category(0)},
 			{"image", ""},
 		},
 	})

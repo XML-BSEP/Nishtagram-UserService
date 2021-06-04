@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"user-service/dto"
 	"user-service/usecase"
 )
 
@@ -12,6 +13,29 @@ type profileInfoHandlder struct {
 	ProfileUseCase usecase.ProfileUseCase
 }
 
+func (p *profileInfoHandlder) GetProfileUsernameImageById(ctx *gin.Context) {
+	var id string
+	err := json.NewDecoder(ctx.Request.Body).Decode(&id)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, "Decoding error")
+		ctx.Abort()
+		return
+	}
+
+	profile, err1 := p.ProfileInfoUseCase.GetById(id, ctx)
+	if err1 != nil {
+		ctx.JSON(http.StatusNotFound, "No users with that id")
+		ctx.Abort()
+		return
+	}
+
+	var profileUIDTO dto.ProfileUsernameImageDTO
+	profileUIDTO = dto.NewProfileUsernameImage(profile.Profile.Username, profile.ProfileImage)
+
+	ctx.JSON(http.StatusOK, gin.H{"data": profileUIDTO})
+
+
+}
 
 func (p *profileInfoHandlder) GetProfileInfoByUsername(ctx *gin.Context) {
 	username := struct {
@@ -38,7 +62,6 @@ func (p *profileInfoHandlder) GetProfileInfoByUsername(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"data": profileInfo})
 
 }
-
 
 func (p *profileInfoHandlder) GetById(ctx *gin.Context) {
 	id := struct {
@@ -99,9 +122,9 @@ type ProfileInfoHandler interface {
 	GetProfileInfoByUsername(ctx *gin.Context)
 	GetById(ctx *gin.Context)
 	IsPrivate(ctx *gin.Context)
+	GetProfileUsernameImageById(ctx *gin.Context)
 
 }
-
 
 
 func NewProfileInfoHandler(usecase usecase.ProfileInfoUseCase, profileUsecase usecase.ProfileUseCase) ProfileInfoHandler{

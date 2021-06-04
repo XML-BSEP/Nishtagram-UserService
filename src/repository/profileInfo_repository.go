@@ -15,6 +15,7 @@ type profileInfoRepository struct {
 }
 
 
+
 type ProfileInfoRepository interface {
 	GetByUsername(username string, ctx context.Context) (domain.ProfileInfo, error)
 	GetAllProfiles(ctx context.Context) ([]domain.ProfileInfo, error)

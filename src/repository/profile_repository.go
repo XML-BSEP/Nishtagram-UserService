@@ -20,6 +20,7 @@ type ProfileRepository interface {
 	GetAllProfiles(ctx context.Context) ([]domain.Profile, error)
 	GetAllUserProfiles(ctx context.Context) ([]domain.Profile, error)
 	IsProfilePrivate(username string, ctx context.Context) (bool, error)
+
 }
 
 func (p *profileRepository) GetByUsername(username string, ctx context.Context) (domain.Profile, error) {

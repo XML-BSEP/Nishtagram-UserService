@@ -11,6 +11,7 @@ func NewRouter(handler interactor.AppHandler) *gin.Engine {
 	router.GET("/getById", handler.GetById)
 	router.GET("/getProfileInfoByUsername", handler.GetProfileInfoByUsername)
 	router.GET("/isPrivate", handler.IsPrivate)
+	router.GET("/getProfileUsernameImageById" ,handler.GetProfileUsernameImageById)
 
 
 	return router

@@ -25,3 +25,5 @@
 ### Go Patch ###
 /vendor/
 /Godeps/
+
+mongodata

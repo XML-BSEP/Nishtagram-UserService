@@ -19,7 +19,7 @@ type Interactor interface {
 	NewProfileUseCase() usecase.ProfileUseCase
 	NewProfileInfoUseCase() usecase.ProfileInfoUseCase
 
-	NewProfileHandler() handler.ProfileHandler
+
 	NewProfileInfoHandler() handler.ProfileInfoHandler
 
 	NewAppHandler() AppHandler
@@ -38,10 +38,6 @@ func (i *interactor) NewProfileUseCase() usecase.ProfileUseCase {
 	return usecase.NewProfileUseCase(i.NewProfileRepository())
 }
 
-func (i *interactor) NewProfileHandler() handler.ProfileHandler {
-	return handler.NewProfileHandler(i.NewProfileUseCase())
-}
-
 
 func (i *interactor) NewProfileInfoRepository() repository.ProfileInfoRepository {
 	return repository.NewProfileInfoRepository(i.db)
@@ -52,24 +48,21 @@ func (i *interactor) NewProfileInfoUseCase() usecase.ProfileInfoUseCase {
 }
 
 func (i *interactor) NewProfileInfoHandler() handler.ProfileInfoHandler {
-	return handler.NewProfileInfoHandler(i.NewProfileInfoUseCase())
+	return handler.NewProfileInfoHandler(i.NewProfileInfoUseCase(), i.NewProfileUseCase())
 }
 
 type appHandler struct {
-	handler.ProfileHandler
 	handler.ProfileInfoHandler
 
 }
 
 type AppHandler interface {
-	handler.ProfileHandler
 	handler.ProfileInfoHandler
 
 }
 
 func (i *interactor) NewAppHandler() AppHandler{
 	appHandler := &appHandler{}
-	appHandler.ProfileHandler = i.NewProfileHandler()
 	appHandler.ProfileInfoHandler = i.NewProfileInfoHandler()
 
 	return appHandler

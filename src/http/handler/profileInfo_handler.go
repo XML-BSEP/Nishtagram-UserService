@@ -9,7 +9,9 @@ import (
 
 type profileInfoHandlder struct {
 	ProfileInfoUseCase usecase.ProfileInfoUseCase
+	ProfileUseCase usecase.ProfileUseCase
 }
+
 
 func (p *profileInfoHandlder) GetProfileInfoByUsername(ctx *gin.Context) {
 	username := struct {
@@ -63,13 +65,45 @@ func (p *profileInfoHandlder) GetById(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"data": profileInfo})
 }
 
-type ProfileInfoHandler interface {
-	GetProfileInfoByUsername(ctx *gin.Context)
+func (p *profileInfoHandlder) IsPrivate(ctx *gin.Context) {
+	var id string
+	err := json.NewDecoder(ctx.Request.Body).Decode(&id)
 
-	GetById(ctx *gin.Context)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, "Decoding error")
+		ctx.Abort()
+		return
+	}
+
+	profile, err1 := p.ProfileInfoUseCase.GetById(id, ctx)
+
+	if err1 != nil {
+		ctx.JSON(http.StatusNotFound, "No users with that id")
+		ctx.Abort()
+		return
+	}
+
+	isPrivate, err2 := p.ProfileUseCase.IsProfilePrivate(profile.Profile.Username, ctx)
+	if err2 != nil {
+		ctx.JSON(http.StatusNotFound, "No users with that id")
+		ctx.Abort()
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"data": isPrivate})
 
 }
 
-func NewProfileInfoHandler(usecase usecase.ProfileInfoUseCase) ProfileInfoHandler{
-	return &profileInfoHandlder{ProfileInfoUseCase: usecase}
+
+type ProfileInfoHandler interface {
+	GetProfileInfoByUsername(ctx *gin.Context)
+	GetById(ctx *gin.Context)
+	IsPrivate(ctx *gin.Context)
+
+}
+
+
+
+func NewProfileInfoHandler(usecase usecase.ProfileInfoUseCase, profileUsecase usecase.ProfileUseCase) ProfileInfoHandler{
+	return &profileInfoHandlder{ProfileInfoUseCase: usecase, ProfileUseCase: profileUsecase}
 }

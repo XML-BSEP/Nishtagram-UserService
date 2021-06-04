@@ -48,6 +48,8 @@ func SeedData(db string, mongoCli *mongo.Client, ctx *context.Context) {
 
 }
 
+
+
 func seedPerson(tags *mongo.Collection, ctx *context.Context) {
 	_, err := tags.InsertMany(*ctx, []interface{} {
 		bson.D{{"_id",  "123456789"},
@@ -68,10 +70,10 @@ func seedPerson(tags *mongo.Collection, ctx *context.Context) {
 func seedProfile(tags *mongo.Collection, ctx *context.Context) {
 	_, err := tags.InsertMany(*ctx, []interface{} {
 		bson.D{{"username", "pera1234"},
-			{"privacy_permission", enum.PrivacyPermission(1)},
+			{"privacy_permission", enum.PrivacyPermission(0)},
 			{"allow_tagging", true},
 			{"allow_notification", true},
-			{"type", enum.ProfileType(0).String()},
+			{"type", enum.ProfileType(0)},
 		},
 	})
 
@@ -90,7 +92,7 @@ func seedProfileInfo(tags *mongo.Collection, ctx *context.Context) {
 	Phone: "011/2112-2111"}
 
 	profile1 := domain.Profile{
-		Username : "pera123",
+		Username : "pera1234",
 		PrivacyPermission : enum.PrivacyPermission(1),
 		AllowTagging : true,
 		AllowNotification: true,

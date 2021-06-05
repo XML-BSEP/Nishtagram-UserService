@@ -7,6 +7,7 @@ import (
 	"time"
 	"user-service/domain"
 	"user-service/domain/enum"
+	"user-service/dto"
 )
 
 type profileInfoRepository struct {
@@ -21,6 +22,8 @@ type ProfileInfoRepository interface {
 	GetAllProfiles(ctx context.Context) ([]domain.ProfileInfo, error)
 	GetAllUserProfiles(ctx context.Context) ([]domain.ProfileInfo, error)
 	GetById(id string, ctx context.Context) (domain.ProfileInfo, error)
+	GetUserById(id string, ctx context.Context) (dto.UserDTO, error)
+	GetUserProfileById(id string, ctx context.Context) (dto.UserProfileDTO, error)
 }
 
 
@@ -80,6 +83,55 @@ func (p *profileInfoRepository) GetById(id string, ctx context.Context) (domain.
 		return profile, err
 	}
 	return profile, nil
+}
+
+func (p *profileInfoRepository) GetUserById(id string, ctx context.Context) (dto.UserDTO, error) {
+	_, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	var profile domain.ProfileInfo
+	var userDTO dto.UserDTO
+	err := p.collection.FindOne(ctx, bson.M{"person._id" : id}).Decode(&profile)
+	if err != nil {
+		return userDTO, err
+	}
+
+	userDTO = dto.NewSimplyUserDTO(profile.Person.Name, profile.Person.Surname, profile.Email, profile.Person.Address,
+		profile.Person.Phone, profile.Person.DateOfBirth.Format("02-Jan-2006"), profile.Person.Gender, profile.WebPage, profile.Biography,
+		profile.Profile.Username, profile.ProfileImage)
+
+	return userDTO, nil
+
+}
+
+func (p *profileInfoRepository) GetUserProfileById(id string, ctx context.Context) (dto.UserProfileDTO, error) {
+	_, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	var profile domain.ProfileInfo
+	err := p.collection.FindOne(ctx, bson.M{"person._id" : id}).Decode(&profile)
+	if err != nil {
+		return dto.UserProfileDTO{}, err
+	}
+
+	userDTO, err1 := p.GetUserById(id, ctx)
+	if err1 != nil {
+		return dto.UserProfileDTO{}, err
+	}
+
+	var isPrivate bool
+	if profile.Profile.PrivacyPermission == 0 {
+		isPrivate = true
+	}
+
+	if profile.Profile.PrivacyPermission == 1 {
+		isPrivate = false
+	}
+
+	userProfileDTO := dto.NewUserProfileDTO(userDTO, &isPrivate)
+
+	return userProfileDTO, nil
+
 }
 
 func NewProfileInfoRepository(db *mongo.Client) ProfileInfoRepository {

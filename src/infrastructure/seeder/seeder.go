@@ -57,7 +57,7 @@ func seedPerson(tags *mongo.Collection, ctx *context.Context) {
 		{"surname", "Peric"},
 		{"gender", enum.Gender(0)},
 		{"date_of_birth", time.Date( 1998, 06, 8, 20, 20, 20, 651387237, time.UTC)},
-		{"address","Bulevar Patrijarha Pavla 10, Novi Sad, Srbija"},
+		{"address","Novi Sad, Srbija"},
 		{"phone", "011/2112-2111"},
 		},
 	})
@@ -88,12 +88,12 @@ func seedProfileInfo(tags *mongo.Collection, ctx *context.Context) {
 	Surname: "Peric",
 	Gender: enum.Gender(0),
 	DateOfBirth: time.Date( 1998, 06, 8, 20, 20, 20, 651387237, time.UTC),
-	Address: "Bulevar Patrijarha Pavla 10, Novi Sad, Srbija",
+	Address: "Novi Sad, Srbija",
 	Phone: "011/2112-2111"}
 
 	profile1 := domain.Profile{
 		Username : "pera1234",
-		PrivacyPermission : enum.PrivacyPermission(1),
+		PrivacyPermission : enum.PrivacyPermission(0),
 		AllowTagging : true,
 		AllowNotification: true,
 		Type : enum.ProfileType(0),

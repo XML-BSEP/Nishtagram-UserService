@@ -14,6 +14,7 @@ func NewRouter(handler interactor.AppHandler) *gin.Engine {
 	router.GET("/getProfileUsernameImageById", handler.GetProfileUsernameImageById)
 	router.GET("/getUserById", handler.GetUserById)
 	router.GET("/getUserProfileById", handler.GetUserProfileById)
+	router.POST("/saveNewUser", handler.SaveNewUser)
 
 
 

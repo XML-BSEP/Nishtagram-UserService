@@ -13,10 +13,9 @@ type interactor struct {
 
 
 type Interactor interface {
-	NewProfileRepository() repository.ProfileRepository
+
 	NewProfileInfoRepository() repository.ProfileInfoRepository
 
-	NewProfileUseCase() usecase.ProfileUseCase
 	NewProfileInfoUseCase() usecase.ProfileInfoUseCase
 
 
@@ -30,13 +29,7 @@ func NewInteractor(db *mongo.Client) Interactor {
 	return &interactor{db: db}
 }
 
-func (i *interactor) NewProfileRepository() repository.ProfileRepository {
-	return repository.NewProfileRepository(i.db)
-}
 
-func (i *interactor) NewProfileUseCase() usecase.ProfileUseCase {
-	return usecase.NewProfileUseCase(i.NewProfileRepository())
-}
 
 
 func (i *interactor) NewProfileInfoRepository() repository.ProfileInfoRepository {
@@ -48,7 +41,7 @@ func (i *interactor) NewProfileInfoUseCase() usecase.ProfileInfoUseCase {
 }
 
 func (i *interactor) NewProfileInfoHandler() handler.ProfileInfoHandler {
-	return handler.NewProfileInfoHandler(i.NewProfileInfoUseCase(), i.NewProfileUseCase())
+	return handler.NewProfileInfoHandler(i.NewProfileInfoUseCase())
 }
 
 type appHandler struct {

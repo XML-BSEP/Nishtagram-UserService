@@ -12,7 +12,6 @@ type profileInfoUseCase struct {
 }
 
 
-
 type ProfileInfoUseCase interface {
 	GetByUsername(username string, ctx context.Context) (domain.ProfileInfo, error)
 	GetAllProfiles(ctx context.Context) ([]domain.ProfileInfo, error)
@@ -20,6 +19,8 @@ type ProfileInfoUseCase interface {
 	GetById(id string, ctx context.Context) (domain.ProfileInfo, error)
 	GetUserById(id string, ctx context.Context) (dto.UserDTO, error)
 	GetUserProfileById(id string, ctx context.Context) (dto.UserProfileDTO, error)
+    IsProfilePrivate(username string, ctx context.Context) (bool, error)
+	SaveNewUser(user domain.ProfileInfo, ctx context.Context) error
 }
 
 func (p *profileInfoUseCase) GetByUsername(username string, ctx context.Context) (domain.ProfileInfo, error) {
@@ -45,6 +46,16 @@ func (p *profileInfoUseCase) GetUserById(id string, ctx context.Context) (dto.Us
 func (p *profileInfoUseCase) GetUserProfileById(id string, ctx context.Context) (dto.UserProfileDTO, error) {
 	return  p.ProfileInfoRepository.GetUserProfileById(id, ctx)
 }
+
+
+func (p *profileInfoUseCase) IsProfilePrivate(username string, ctx context.Context) (bool, error) {
+	return  p.ProfileInfoRepository.IsProfilePrivate(username, ctx)
+}
+
+func (p *profileInfoUseCase) SaveNewUser(user domain.ProfileInfo, ctx context.Context) error {
+	return p.ProfileInfoRepository.SaveNewUser(user, ctx)
+}
+
 
 func NewProfileInfoUseCase(repo repository.ProfileInfoRepository) ProfileInfoUseCase {
 	return &profileInfoUseCase{ ProfileInfoRepository: repo}

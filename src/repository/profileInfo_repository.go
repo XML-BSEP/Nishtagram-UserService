@@ -16,7 +16,6 @@ type profileInfoRepository struct {
 }
 
 
-
 type ProfileInfoRepository interface {
 	GetByUsername(username string, ctx context.Context) (domain.ProfileInfo, error)
 	GetAllProfiles(ctx context.Context) ([]domain.ProfileInfo, error)
@@ -24,8 +23,28 @@ type ProfileInfoRepository interface {
 	GetById(id string, ctx context.Context) (domain.ProfileInfo, error)
 	GetUserById(id string, ctx context.Context) (dto.UserDTO, error)
 	GetUserProfileById(id string, ctx context.Context) (dto.UserProfileDTO, error)
+	SaveNewUser(user domain.ProfileInfo, ctx context.Context) error
+	IsProfilePrivate(username string, ctx context.Context) (bool, error)
 }
 
+func (p *profileInfoRepository) IsProfilePrivate(username string, ctx context.Context) (bool, error) {
+	_, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+
+	var profile domain.ProfileInfo
+	err := p.collection.FindOne(ctx, bson.M{"profile.username" : username}).Decode(&profile)
+	if err != nil {
+		return false, err
+	}
+
+	if profile.Profile.PrivacyPermission.String() == "Private" {
+		return true, nil
+	}
+
+	return false, nil
+
+}
 
 func (p *profileInfoRepository) GetByUsername(username string, ctx context.Context) (domain.ProfileInfo, error) {
 	_, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -78,7 +97,7 @@ func (p *profileInfoRepository) GetById(id string, ctx context.Context) (domain.
 	defer cancel()
 
 	var profile domain.ProfileInfo
-	err := p.collection.FindOne(ctx, bson.M{"person._id" : id}).Decode(&profile)
+	err := p.collection.FindOne(ctx, bson.M{"_id" : id}).Decode(&profile)
 	if err != nil {
 		return profile, err
 	}
@@ -91,7 +110,7 @@ func (p *profileInfoRepository) GetUserById(id string, ctx context.Context) (dto
 
 	var profile domain.ProfileInfo
 	var userDTO dto.UserDTO
-	err := p.collection.FindOne(ctx, bson.M{"person._id" : id}).Decode(&profile)
+	err := p.collection.FindOne(ctx, bson.M{"_id" : id}).Decode(&profile)
 	if err != nil {
 		return userDTO, err
 	}
@@ -109,7 +128,7 @@ func (p *profileInfoRepository) GetUserProfileById(id string, ctx context.Contex
 	defer cancel()
 
 	var profile domain.ProfileInfo
-	err := p.collection.FindOne(ctx, bson.M{"person._id" : id}).Decode(&profile)
+	err := p.collection.FindOne(ctx, bson.M{"_id" : id}).Decode(&profile)
 	if err != nil {
 		return dto.UserProfileDTO{}, err
 	}
@@ -134,9 +153,23 @@ func (p *profileInfoRepository) GetUserProfileById(id string, ctx context.Contex
 
 }
 
+
+func (p *profileInfoRepository) SaveNewUser(user domain.ProfileInfo, ctx context.Context) error {
+	_, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+
+	_, err := p.collection.InsertOne(ctx, user)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func NewProfileInfoRepository(db *mongo.Client) ProfileInfoRepository {
 	return &profileInfoRepository {
 		db : db,
-		collection: db.Database("user_db").Collection("profiles_info"),
+		collection: db.Database("user_db").Collection("profiles"),
 	}
 }

@@ -8,13 +8,16 @@ import (
 func NewRouter(handler interactor.AppHandler) *gin.Engine {
 	router := gin.Default()
 
-	router.GET("/getById", handler.GetById)
-	router.GET("/getProfileInfoByUsername", handler.GetProfileInfoByUsername)
-	router.GET("/isPrivate", handler.IsPrivate)
-	router.GET("/getProfileUsernameImageById", handler.GetProfileUsernameImageById)
-	router.GET("/getUserById", handler.GetUserById)
-	router.GET("/getUserProfileById", handler.GetUserProfileById)
-	router.POST("/saveNewUser", handler.SaveNewUser)
+	g := router.Group("/profile")
+	//g.Use(middleware.AuthMiddleware())
+
+	//router.GET("/getById", handler.GetById)
+	g.GET("/getProfileInfoByUsername", handler.GetProfileInfoByUsername)
+	g.GET("/isPrivate", handler.IsPrivate)
+	g.GET("/getProfileUsernameImageById", handler.GetProfileUsernameImageById)
+	//router.GET("/getUserById", handler.GetUserById)
+	g.GET("/getUserProfileById", handler.GetUserProfileById)
+	g.POST("/saveNewUser", handler.SaveNewUser)
 
 
 

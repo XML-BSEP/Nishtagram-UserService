@@ -1,0 +1,5 @@
+p, USER, profile/getProfileInfoByUsername
+p, USER, profile/isPrivate
+p, USER, profile/getProfileUsernameImageById
+p, USER, profile/getUserProfileById
+p, USER, profile/saveNewUser

@@ -38,9 +38,35 @@ func SeedData(db string, mongoCli *mongo.Client, ctx *context.Context) {
 		seedRequestVerification(personCollection, ctx)
 	}
 
+	if cnt,_ := mongoCli.Database(db).Collection("admins").EstimatedDocumentCount(*ctx, nil); cnt == 0 {
+		personCollection := mongoCli.Database(db).Collection("admins")
+		seedAdmins(personCollection, ctx)
+	}
+
 }
 
+func seedAdmins(tags *mongo.Collection, ctx *context.Context) {
+	person1 := domain.Person{
+		Name: "Mika",
+		Surname: "Mikic",
+		Gender: enum.Gender(0),
+		DateOfBirth: time.Date( 1998, 06, 8, 20, 20, 20, 651387237, time.UTC),
+		Address: "Novi Sad, Srbija",
+		Phone: "011/2112-21111",
+	}
 
+	_, err := tags.InsertMany(*ctx, []interface{} {
+		bson.D{{"_id", "111"},
+			{"username", "admin1"},
+			{"person", person1},
+		},
+	})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+}
 
 func seedProfileInfo(tags *mongo.Collection, ctx *context.Context) {
 	person1 := domain.Person{

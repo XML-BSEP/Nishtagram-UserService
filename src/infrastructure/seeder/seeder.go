@@ -21,18 +21,10 @@ func DropDatabase(db string, mongoCli *mongo.Client, ctx *context.Context){
 func SeedData(db string, mongoCli *mongo.Client, ctx *context.Context) {
 	DropDatabase(db, mongoCli, ctx)
 
-	if cnt,_ := mongoCli.Database(db).Collection("persons").EstimatedDocumentCount(*ctx, nil); cnt == 0 {
-		personCollection := mongoCli.Database(db).Collection("persons")
-		seedPerson(personCollection, ctx)
-	}
+
 
 	if cnt,_ := mongoCli.Database(db).Collection("profiles").EstimatedDocumentCount(*ctx, nil); cnt == 0 {
 		personCollection := mongoCli.Database(db).Collection("profiles")
-		seedProfile(personCollection, ctx)
-	}
-
-	if cnt,_ := mongoCli.Database(db).Collection("profiles_info").EstimatedDocumentCount(*ctx, nil); cnt == 0 {
-		personCollection := mongoCli.Database(db).Collection("profiles_info")
 		seedProfileInfo(personCollection, ctx)
 	}
 
@@ -50,40 +42,8 @@ func SeedData(db string, mongoCli *mongo.Client, ctx *context.Context) {
 
 
 
-func seedPerson(tags *mongo.Collection, ctx *context.Context) {
-	_, err := tags.InsertMany(*ctx, []interface{} {
-		bson.D{{"_id",  "123456789"},
-		{"name", "Pera"},
-		{"surname", "Peric"},
-		{"gender", enum.Gender(0)},
-		{"date_of_birth", time.Date( 1998, 06, 8, 20, 20, 20, 651387237, time.UTC)},
-		{"address","Novi Sad, Srbija"},
-		{"phone", "011/2112-2111"},
-		},
-	})
-
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-func seedProfile(tags *mongo.Collection, ctx *context.Context) {
-	_, err := tags.InsertMany(*ctx, []interface{} {
-		bson.D{{"username", "pera1234"},
-			{"privacy_permission", enum.PrivacyPermission(0)},
-			{"allow_tagging", true},
-			{"allow_notification", true},
-			{"type", enum.ProfileType(0)},
-		},
-	})
-
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
 func seedProfileInfo(tags *mongo.Collection, ctx *context.Context) {
-	person1 := domain.Person{ID: "123456789",
+	person1 := domain.Person{
 	Name: "Pera",
 	Surname: "Peric",
 	Gender: enum.Gender(0),
@@ -92,7 +52,7 @@ func seedProfileInfo(tags *mongo.Collection, ctx *context.Context) {
 	Phone: "011/2112-2111"}
 
 	profile1 := domain.Profile{
-		Username : "pera1234",
+		Username : "user1",
 		PrivacyPermission : enum.PrivacyPermission(0),
 		AllowTagging : true,
 		AllowNotification: true,
@@ -100,8 +60,8 @@ func seedProfileInfo(tags *mongo.Collection, ctx *context.Context) {
 	}
 
 	_, err := tags.InsertMany(*ctx, []interface{} {
-		bson.D{{"email", "para@pera.com"},
-			{"password", "$2y$12$haErHk8CNLaodc4rfEFwNeX5MRkXlfpeziRCimK025BJhFVlQmpIa"},
+		bson.D{{"_id", "e2b5f92e-c31b-11eb-8529-0242ac130003"},
+			{"email", "user1@gmail.com"},
 			{"biography", "Ja sam kul osoba"},
 			{"web_page", "pera.com"},
 			{"category", enum.Category(6)},

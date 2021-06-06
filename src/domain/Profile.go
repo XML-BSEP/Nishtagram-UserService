@@ -9,3 +9,7 @@ type Profile struct {
 	AllowNotification bool `bson:"allow_notification" json:"allow_notification"`
 	Type enum.ProfileType `bson:"type" json:"type"`
 }
+
+func NewProfile(username string, privacy enum.PrivacyPermission, allowtag bool, allownot bool, typeP enum.ProfileType) Profile {
+	return Profile{Username: username, PrivacyPermission: privacy, AllowTagging: allowtag, AllowNotification: allownot, Type: typeP}
+}

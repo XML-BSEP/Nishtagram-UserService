@@ -10,19 +10,12 @@ import (
 
 type profileInfoHandlder struct {
 	ProfileInfoUseCase usecase.ProfileInfoUseCase
-	ProfileUseCase usecase.ProfileUseCase
 }
 
 
 
 func (p *profileInfoHandlder) GetProfileUsernameImageById(ctx *gin.Context) {
-	var id string
-	err := json.NewDecoder(ctx.Request.Body).Decode(&id)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, "Decoding error")
-		ctx.Abort()
-		return
-	}
+	id := ctx.Request.URL.Query().Get("userId")
 
 	profile, err1 := p.ProfileInfoUseCase.GetById(id, ctx)
 	if err1 != nil {
@@ -40,20 +33,9 @@ func (p *profileInfoHandlder) GetProfileUsernameImageById(ctx *gin.Context) {
 }
 
 func (p *profileInfoHandlder) GetProfileInfoByUsername(ctx *gin.Context) {
-	username := struct {
-		Username string
-	}{}
+	username := ctx.Request.URL.Query().Get("username")
 
-	decoder := json.NewDecoder(ctx.Request.Body)
-	dec_err := decoder.Decode(&username)
-
-	if dec_err != nil {
-		ctx.JSON(http.StatusBadRequest, "username decoding error")
-		ctx.Abort()
-		return
-	}
-
-	profileInfo, err := p.ProfileInfoUseCase.GetByUsername(username.Username, ctx)
+	profileInfo, err := p.ProfileInfoUseCase.GetByUsername(username, ctx)
 
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, "No users with that username")
@@ -66,20 +48,9 @@ func (p *profileInfoHandlder) GetProfileInfoByUsername(ctx *gin.Context) {
 }
 
 func (p *profileInfoHandlder) GetById(ctx *gin.Context) {
-	id := struct {
-		Id string
-	}{}
+	id := ctx.Request.URL.Query().Get("userId")
 
-	decoder := json.NewDecoder(ctx.Request.Body)
-	dec_err := decoder.Decode(&id)
-
-	if dec_err != nil {
-		ctx.JSON(http.StatusBadRequest, "username decoding error")
-		ctx.Abort()
-		return
-	}
-
-	profileInfo, err := p.ProfileInfoUseCase.GetById(id.Id, ctx)
+	profileInfo, err := p.ProfileInfoUseCase.GetById(id, ctx)
 
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, "No users with that id")
@@ -91,14 +62,7 @@ func (p *profileInfoHandlder) GetById(ctx *gin.Context) {
 }
 
 func (p *profileInfoHandlder) IsPrivate(ctx *gin.Context) {
-	var id string
-	err := json.NewDecoder(ctx.Request.Body).Decode(&id)
-
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, "Decoding error")
-		ctx.Abort()
-		return
-	}
+	id := ctx.Request.URL.Query().Get("userId")
 
 	profile, err1 := p.ProfileInfoUseCase.GetById(id, ctx)
 
@@ -108,7 +72,7 @@ func (p *profileInfoHandlder) IsPrivate(ctx *gin.Context) {
 		return
 	}
 
-	isPrivate, err2 := p.ProfileUseCase.IsProfilePrivate(profile.Profile.Username, ctx)
+	isPrivate, err2 := p.ProfileInfoUseCase.IsProfilePrivate(profile.Profile.Username, ctx)
 	if err2 != nil {
 		ctx.JSON(http.StatusNotFound, "No users with that id")
 		ctx.Abort()
@@ -120,14 +84,7 @@ func (p *profileInfoHandlder) IsPrivate(ctx *gin.Context) {
 }
 
 func (p *profileInfoHandlder) GetUserById(ctx *gin.Context) {
-	var id string
-	err := json.NewDecoder(ctx.Request.Body).Decode(&id)
-
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, "Decoding error")
-		ctx.Abort()
-		return
-	}
+	id := ctx.Request.URL.Query().Get("userId")
 
 	profileDTO, error := p.ProfileInfoUseCase.GetUserById(id, ctx)
 	if error != nil{
@@ -140,14 +97,9 @@ func (p *profileInfoHandlder) GetUserById(ctx *gin.Context) {
 }
 
 func (p *profileInfoHandlder) GetUserProfileById(ctx *gin.Context) {
-	var id string
-	err := json.NewDecoder(ctx.Request.Body).Decode(&id)
 
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, "Decoding error")
-		ctx.Abort()
-		return
-	}
+	id := ctx.Request.URL.Query().Get("userId")
+
 
 	profileUserDTO, error := p.ProfileInfoUseCase.GetUserProfileById(id, ctx)
 	if error != nil{
@@ -161,7 +113,6 @@ func (p *profileInfoHandlder) GetUserProfileById(ctx *gin.Context) {
 
 }
 
-
 type ProfileInfoHandler interface {
 	GetProfileInfoByUsername(ctx *gin.Context)
 	GetById(ctx *gin.Context)
@@ -169,10 +120,33 @@ type ProfileInfoHandler interface {
 	GetProfileUsernameImageById(ctx *gin.Context)
 	GetUserById(ctx *gin.Context)
 	GetUserProfileById(ctx *gin.Context)
+	SaveNewUser(ctx *gin.Context)
+}
+
+func (p *profileInfoHandlder) SaveNewUser(ctx *gin.Context) {
+	var newUserDTO dto.NewUserDTO
+
+	err := json.NewDecoder(ctx.Request.Body).Decode(&newUserDTO)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, "Decoding error")
+		ctx.Abort()
+		return
+	}
+
+	newUserProfile := dto.NewUserDTOtoEntity(newUserDTO)
+
+	error := p.ProfileInfoUseCase.SaveNewUser(newUserProfile, ctx)
+	if error != nil {
+		ctx.JSON(http.StatusNotFound, "Failed to save")
+		ctx.Abort()
+		return
+	}
+
+	ctx.JSON(http.StatusOK, "idegasnamax")
+
 }
 
 
-
-func NewProfileInfoHandler(usecase usecase.ProfileInfoUseCase, profileUsecase usecase.ProfileUseCase) ProfileInfoHandler{
-	return &profileInfoHandlder{ProfileInfoUseCase: usecase, ProfileUseCase: profileUsecase}
+func NewProfileInfoHandler(usecase usecase.ProfileInfoUseCase) ProfileInfoHandler{
+	return &profileInfoHandlder{ProfileInfoUseCase: usecase}
 }

@@ -25,7 +25,7 @@ type ProfileInfoUseCase interface {
 	GetAllUserProfiles(ctx context.Context) ([]domain.ProfileInfo, error)
 	GetById(id string, ctx context.Context) (domain.ProfileInfo, error)
 	GetUserById(id string, ctx context.Context) (dto.UserDTO, error)
-	//GetUserProfileById(id string, ctx context.Context) (dto.UserProfileDTO, error)
+	GetUserProfileById(id string, ctx context.Context) (dto.UserProfileDTO, error)
     IsProfilePrivate(username string, ctx context.Context) (bool, error)
 	SaveNewUser(user domain.ProfileInfo, ctx context.Context) error
 	Exists(username string, email string, ctx context.Context) (bool, error)
@@ -71,10 +71,28 @@ func (p *profileInfoUseCase) GetUserById(id string, ctx context.Context) (dto.Us
 	return userDTO, nil
 }
 
-/*func (p *profileInfoUseCase) GetUserProfileById(id string, ctx context.Context) (dto.UserProfileDTO, error) {
+func (p *profileInfoUseCase) GetUserProfileById(id string, ctx context.Context) (dto.UserProfileDTO, error) {
+	profile, _ := p.ProfileInfoRepository.GetUserById(id, ctx)
 
-	return  p.ProfileInfoRepository.GetUserProfileById(id, ctx)
-}*/
+	var encodedImage string
+	if profile.ProfileImage != "" {
+		encodedImage, _ = p.DecodeBase64(profile.ProfileImage, profile.ID, ctx)
+	}else {encodedImage = profile.ProfileImage }
+
+	userDTO := dto.NewSimplyUserDTO(profile.Person.Name, profile.Person.Surname, profile.Email, profile.Person.Address,
+		profile.Person.Phone, profile.Person.DateOfBirth.Format("02-Jan-2006"), profile.Person.Gender, profile.WebPage, profile.Biography,
+		profile.Profile.Username, encodedImage)
+
+	var private bool
+	if profile.Profile.PrivacyPermission == 0 {
+		private = true
+	}else {
+		private = false
+	}
+	userProfileDto := dto.NewUserProfileDTO(userDTO, &private)
+
+	return  userProfileDto, nil
+}
 
 func (p *profileInfoUseCase) IsProfilePrivate(username string, ctx context.Context) (bool, error) {
 	return  p.ProfileInfoRepository.IsProfilePrivate(username, ctx)

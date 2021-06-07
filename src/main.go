@@ -17,5 +17,6 @@ func main() {
 	appHandler := interactor.NewAppHandler()
 
 	router := router2.NewRouter(appHandler)
+
 	router.RunTLS("localhost:8082", "../certificate/cert.pem", "../certificate/key.pem")
 }

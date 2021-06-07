@@ -94,10 +94,10 @@ func (p *profileInfoHandlder) GetUserById(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"data": profileDTO})
+	ctx.JSON(http.StatusOK, profileDTO)
 }
 
-/*func (p *profileInfoHandlder) GetUserProfileById(ctx *gin.Context) {
+func (p *profileInfoHandlder) GetUserProfileById(ctx *gin.Context) {
 
 	id := ctx.Request.URL.Query().Get("userId")
 
@@ -109,10 +109,10 @@ func (p *profileInfoHandlder) GetUserById(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"data": profileUserDTO})
+	ctx.JSON(http.StatusOK, profileUserDTO)
 
 
-}*/
+}
 
 
 func (p *profileInfoHandlder) SaveNewUser(ctx *gin.Context) {
@@ -172,7 +172,7 @@ type ProfileInfoHandler interface {
 	IsPrivate(ctx *gin.Context)
 	GetProfileUsernameImageById(ctx *gin.Context)
 	GetUserById(ctx *gin.Context)
-	//GetUserProfileById(ctx *gin.Context)
+	GetUserProfileById(ctx *gin.Context)
 	SaveNewUser(ctx *gin.Context)
 	GetAllPublicProfiles (ctx *gin.Context)
 }

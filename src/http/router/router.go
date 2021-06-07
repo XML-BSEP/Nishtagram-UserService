@@ -20,6 +20,7 @@ func NewRouter(handler interactor.AppHandler) *gin.Engine {
 	router.POST("/saveNewUser", handler.SaveNewUser)
 	router.GET("/getAllPublicUsers", handler.GetAllPublicProfiles)
 	router.POST("/editUser", handler.EditUser)
+	router.GET("/getProfileInfo", handler.GetProfileInfoById)
 
 
 	return router

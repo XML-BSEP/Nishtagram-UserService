@@ -41,7 +41,7 @@ func NewUserDTOtoEntity(newUserDto NewUserDTO) domain.ProfileInfo {
 	}
 
 	var privacy enum.PrivacyPermission
-	if newUserDto.Private {
+	if newUserDto.Private == true {
 		privacy = enum.PrivacyPermission(0)
 	}else {
 		privacy = enum.PrivacyPermission(1)

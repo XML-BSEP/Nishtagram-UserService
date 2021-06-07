@@ -14,8 +14,6 @@ type profileInfoRepository struct {
 	db *mongo.Client
 }
 
-
-
 type ProfileInfoRepository interface {
 	GetByUsername(username string, ctx context.Context) (domain.ProfileInfo, error)
 	GetAllProfiles(ctx context.Context) ([]domain.ProfileInfo, error)
@@ -27,6 +25,7 @@ type ProfileInfoRepository interface {
 	IsProfilePrivate(username string, ctx context.Context) (bool, error)
 	Exists(username string, email string, ctx context.Context) (bool, error)
 	GetAllPublicProfiles(ctx context.Context) ([]domain.ProfileInfo, error)
+	EditUser(user domain.ProfileInfo, ctx context.Context) error
 }
 
 func (p *profileInfoRepository) Exists(username string, email string, ctx context.Context) (bool, error){
@@ -199,6 +198,42 @@ func (p *profileInfoRepository) GetAllPublicProfiles(ctx context.Context) ([]dom
 
 	return allProfiles, nil
 }
+
+
+func (p *profileInfoRepository) EditUser(user domain.ProfileInfo, ctx context.Context) error {
+	_, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	/*Email string `bson:"email" json:"email"`
+	Biography string `bson:"biography" json:"biography"`
+	WebPage string `bson:"web_page" json:"web_page"`
+	Category enum.Category `json:"category" bson:"category"`
+	ProfileImage string `bson:"profile_image" json:"profile_image"`
+	Person Person `bson:"person" json:"person"`
+	Profile Profile `bson:"profile" json:"profile"`*/
+
+
+	userToUpdate := bson.M{"_id" : user.ID}
+	updatedUser := bson.M{"$set": bson.M{
+		"email":      user.Email,
+		"biography":    user.Biography,
+		"web_page":       user.WebPage,
+		"category": user.Category,
+		"profile_image" : user.ProfileImage,
+		"person" : user.Person,
+		"profile" : user.Profile,
+
+	}}
+
+
+	_, err := p.collection.UpdateOne(ctx, userToUpdate, updatedUser)
+	if err != nil {
+		return  err
+	}
+
+	return nil
+
+}
+
 
 func NewProfileInfoRepository(db *mongo.Client) ProfileInfoRepository {
 	return &profileInfoRepository {

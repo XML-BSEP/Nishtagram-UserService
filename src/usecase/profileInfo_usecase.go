@@ -19,6 +19,7 @@ type profileInfoUseCase struct {
 	ProfileInfoRepository repository.ProfileInfoRepository
 }
 
+
 type ProfileInfoUseCase interface {
 	GetByUsername(username string, ctx context.Context) (domain.ProfileInfo, error)
 	GetAllProfiles(ctx context.Context) ([]domain.ProfileInfo, error)
@@ -32,6 +33,7 @@ type ProfileInfoUseCase interface {
 	EncodeBase64(media string, userId string, ctx context.Context) (string, error)
 	GetAllPublicProfiles(ctx context.Context) ([]dto.UserDTO, error)
 	DecodeBase64(media string, userId string, ctx context.Context) (string, error)
+	EditUser(newUser dto.NewUserDTO, ctx context.Context) error
 }
 
 func (p *profileInfoUseCase) Exists(username string, email string, ctx context.Context) (bool, error) {
@@ -65,7 +67,7 @@ func (p *profileInfoUseCase) GetUserById(id string, ctx context.Context) (dto.Us
 
 	userDTO := dto.NewSimplyUserDTO(profile.Person.Name, profile.Person.Surname, profile.Email, profile.Person.Address,
 		profile.Person.Phone, profile.Person.DateOfBirth.Format("02-Jan-2006"), profile.Person.Gender, profile.WebPage, profile.Biography,
-		profile.Profile.Username, encodedImage)
+		profile.Profile.Username, encodedImage, profile.Profile.PrivacyPermission.String())
 
 
 	return userDTO, nil
@@ -81,7 +83,7 @@ func (p *profileInfoUseCase) GetUserProfileById(id string, ctx context.Context) 
 
 	userDTO := dto.NewSimplyUserDTO(profile.Person.Name, profile.Person.Surname, profile.Email, profile.Person.Address,
 		profile.Person.Phone, profile.Person.DateOfBirth.Format("02-Jan-2006"), profile.Person.Gender, profile.WebPage, profile.Biography,
-		profile.Profile.Username, encodedImage)
+		profile.Profile.Username, encodedImage, profile.Profile.PrivacyPermission.String())
 
 	var private bool
 	if profile.Profile.PrivacyPermission == 0 {
@@ -163,7 +165,6 @@ func (p *profileInfoUseCase) GetAllPublicProfiles(ctx context.Context) ([]dto.Us
 
 }
 
-
 func (p *profileInfoUseCase) DecodeBase64(media string, userId string, ctx context.Context) (string, error) {
 	workingDirectory, _ := os.Getwd()
 
@@ -195,6 +196,30 @@ func (p *profileInfoUseCase) DecodeBase64(media string, userId string, ctx conte
 }
 
 
+func (p *profileInfoUseCase) EditUser(newUser dto.NewUserDTO, ctx context.Context) error {
+	_, err := p.GetUserById(newUser.ID, ctx)
+	if err != nil {
+		return err
+	}
+
+	var editedUser domain.ProfileInfo
+	editedUser = dto.NewUserDTOtoEntity(newUser)
+	if editedUser.ProfileImage != "" {
+		image, err := p.EncodeBase64(editedUser.ProfileImage, editedUser.ID, ctx)
+		if err != nil {
+			return err
+		}
+		editedUser.ProfileImage = image
+	}
+
+	errRepo := p.ProfileInfoRepository.EditUser(editedUser, ctx)
+	if err != nil {
+		return errRepo
+	}
+	return nil
+
+
+}
 
 func NewProfileInfoUseCase(repo repository.ProfileInfoRepository) ProfileInfoUseCase {
 	return &profileInfoUseCase{ ProfileInfoRepository: repo}

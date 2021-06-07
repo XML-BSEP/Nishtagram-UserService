@@ -114,7 +114,6 @@ func (p *profileInfoHandlder) GetUserProfileById(ctx *gin.Context) {
 
 }
 
-
 func (p *profileInfoHandlder) SaveNewUser(ctx *gin.Context) {
 	var newUserDTO dto.NewUserDTO
 
@@ -165,6 +164,28 @@ func (p *profileInfoHandlder) GetAllPublicProfiles(ctx *gin.Context) {
 	return
 }
 
+func (p *profileInfoHandlder) EditUser(ctx *gin.Context) {
+	var newUserDTO dto.NewUserDTO
+
+	err := json.NewDecoder(ctx.Request.Body).Decode(&newUserDTO)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, "Decoding error")
+		ctx.Abort()
+		return
+	}
+
+
+
+	error := p.ProfileInfoUseCase.EditUser(newUserDTO, ctx)
+	if error != nil {
+		ctx.JSON(http.StatusNotFound, "Failed to edit")
+		ctx.Abort()
+		return
+	}
+
+	ctx.JSON(http.StatusOK, "edit works")
+
+}
 
 type ProfileInfoHandler interface {
 	GetProfileInfoByUsername(ctx *gin.Context)
@@ -175,6 +196,7 @@ type ProfileInfoHandler interface {
 	GetUserProfileById(ctx *gin.Context)
 	SaveNewUser(ctx *gin.Context)
 	GetAllPublicProfiles (ctx *gin.Context)
+	EditUser(ctx *gin.Context)
 }
 func NewProfileInfoHandler(usecase usecase.ProfileInfoUseCase) ProfileInfoHandler{
 	return &profileInfoHandlder{ProfileInfoUseCase: usecase}

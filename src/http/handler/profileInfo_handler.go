@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -138,6 +139,16 @@ func (p *profileInfoHandlder) SaveNewUser(ctx *gin.Context) {
 	if exists {
 		ctx.JSON(400, gin.H{"message" : "User already exists"})
 		return
+	}
+
+	if newUserDTO.Image != "" {
+		mediaToAttach, err := p.ProfileInfoUseCase.EncodeBase64(newUserDTO.Image, newUserDTO.ID, context.Background())
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, "error while decoding base64")
+			ctx.Abort()
+			return
+		}
+		newUserDTO.Image = mediaToAttach
 	}
 
 	newUserProfile := dto.NewUserDTOtoEntity(newUserDTO)

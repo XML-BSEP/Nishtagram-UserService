@@ -133,6 +133,13 @@ func (p *profileInfoHandlder) SaveNewUser(ctx *gin.Context) {
 		return
 	}
 
+	exists, _ := p.ProfileInfoUseCase.Exists(newUserDTO.Username, newUserDTO.Email, ctx)
+
+	if exists {
+		ctx.JSON(400, gin.H{"message" : "User already exists"})
+		return
+	}
+
 	newUserProfile := dto.NewUserDTOtoEntity(newUserDTO)
 
 	error := p.ProfileInfoUseCase.SaveNewUser(newUserProfile, ctx)

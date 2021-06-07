@@ -25,6 +25,21 @@ type ProfileInfoRepository interface {
 	GetUserProfileById(id string, ctx context.Context) (dto.UserProfileDTO, error)
 	SaveNewUser(user domain.ProfileInfo, ctx context.Context) error
 	IsProfilePrivate(username string, ctx context.Context) (bool, error)
+	Exists(username string, email string, ctx context.Context) (bool, error)
+}
+
+func (p *profileInfoRepository) Exists(username string, email string, ctx context.Context) (bool, error){
+	_, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+
+	var profile domain.ProfileInfo
+	err := p.collection.FindOne(ctx, bson.M{"profile.username" : username, "email" : email}).Decode(&profile)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+
 }
 
 func (p *profileInfoRepository) IsProfilePrivate(username string, ctx context.Context) (bool, error) {

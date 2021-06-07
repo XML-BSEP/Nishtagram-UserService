@@ -13,9 +13,9 @@ func NewRouter(handler interactor.AppHandler) *gin.Engine {
 	router.GET("/isPrivate", handler.IsPrivate)
 	router.GET("/getProfileUsernameImageById", handler.GetProfileUsernameImageById)
 	router.GET("/getUserById", handler.GetUserById)
-	router.GET("/getUserProfileById", handler.GetUserProfileById)
+	//router.GET("/getUserProfileById", handler.GetUserProfileById)
 	router.POST("/saveNewUser", handler.SaveNewUser)
-
+	router.GET("/getAllPublicUsers", handler.GetAllPublicProfiles)
 
 
 	return router

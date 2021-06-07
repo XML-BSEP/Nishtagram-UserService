@@ -7,7 +7,6 @@ import (
 	"time"
 	"user-service/domain"
 	"user-service/domain/enum"
-	"user-service/dto"
 )
 
 type profileInfoRepository struct {
@@ -16,16 +15,18 @@ type profileInfoRepository struct {
 }
 
 
+
 type ProfileInfoRepository interface {
 	GetByUsername(username string, ctx context.Context) (domain.ProfileInfo, error)
 	GetAllProfiles(ctx context.Context) ([]domain.ProfileInfo, error)
 	GetAllUserProfiles(ctx context.Context) ([]domain.ProfileInfo, error)
 	GetById(id string, ctx context.Context) (domain.ProfileInfo, error)
-	GetUserById(id string, ctx context.Context) (dto.UserDTO, error)
-	GetUserProfileById(id string, ctx context.Context) (dto.UserProfileDTO, error)
+	GetUserById(id string, ctx context.Context) (domain.ProfileInfo, error)
+	//GetUserProfileById(id string, ctx context.Context) (dto.UserProfileDTO, error)
 	SaveNewUser(user domain.ProfileInfo, ctx context.Context) error
 	IsProfilePrivate(username string, ctx context.Context) (bool, error)
 	Exists(username string, email string, ctx context.Context) (bool, error)
+	GetAllPublicProfiles(ctx context.Context) ([]domain.ProfileInfo, error)
 }
 
 func (p *profileInfoRepository) Exists(username string, email string, ctx context.Context) (bool, error){
@@ -119,26 +120,27 @@ func (p *profileInfoRepository) GetById(id string, ctx context.Context) (domain.
 	return profile, nil
 }
 
-func (p *profileInfoRepository) GetUserById(id string, ctx context.Context) (dto.UserDTO, error) {
+func (p *profileInfoRepository) GetUserById(id string, ctx context.Context) (domain.ProfileInfo, error) {
 	_, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	var profile domain.ProfileInfo
-	var userDTO dto.UserDTO
+
 	err := p.collection.FindOne(ctx, bson.M{"_id" : id}).Decode(&profile)
 	if err != nil {
-		return userDTO, err
+		return profile, err
 	}
-
+	/*
 	userDTO = dto.NewSimplyUserDTO(profile.Person.Name, profile.Person.Surname, profile.Email, profile.Person.Address,
 		profile.Person.Phone, profile.Person.DateOfBirth.Format("02-Jan-2006"), profile.Person.Gender, profile.WebPage, profile.Biography,
-		profile.Profile.Username, profile.ProfileImage)
+		profile.Profile.Username, profile.ProfileImage)*/
 
-	return userDTO, nil
+
+	return profile, nil
 
 }
 
-func (p *profileInfoRepository) GetUserProfileById(id string, ctx context.Context) (dto.UserProfileDTO, error) {
+/*func (p *profileInfoRepository) GetUserProfileById(id string, ctx context.Context) (dto.UserProfileDTO, error) {
 	_, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -162,12 +164,11 @@ func (p *profileInfoRepository) GetUserProfileById(id string, ctx context.Contex
 		isPrivate = false
 	}
 
-	userProfileDTO := dto.NewUserProfileDTO(userDTO, &isPrivate)
+	userProfileDTO := dto.NewUserProfileDTO(dto.NewUserDTOfromEntity(userDTO), &isPrivate)
 
 	return userProfileDTO, nil
 
-}
-
+}*/
 
 func (p *profileInfoRepository) SaveNewUser(user domain.ProfileInfo, ctx context.Context) error {
 	_, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -180,6 +181,23 @@ func (p *profileInfoRepository) SaveNewUser(user domain.ProfileInfo, ctx context
 	}
 
 	return nil
+}
+
+func (p *profileInfoRepository) GetAllPublicProfiles(ctx context.Context) ([]domain.ProfileInfo, error) {
+	_, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	profiles , err := p.collection.Find(ctx, bson.M{"profile.privacy_permission" : 1})
+	if err != nil {
+		return nil, err
+	}
+
+	var allProfiles []domain.ProfileInfo
+	if err = profiles.All(ctx, &allProfiles); err != nil {
+		return nil, err
+	}
+
+	return allProfiles, nil
 }
 
 func NewProfileInfoRepository(db *mongo.Client) ProfileInfoRepository {

@@ -199,8 +199,6 @@ func (p *profileInfoUseCase) DecodeBase64(media string, userId string, ctx conte
 
 	encoded := base64.StdEncoding.EncodeToString(content)
 
-
-	fmt.Println("ENCODED: " + encoded)
 	os.Chdir(workingDirectory)
 
 	return "data:image/jpg;base64," + encoded, nil

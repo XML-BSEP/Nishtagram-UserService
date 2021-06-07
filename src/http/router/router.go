@@ -8,7 +8,6 @@ import (
 
 func NewRouter(handler interactor.AppHandler) *gin.Engine {
 	router := gin.Default()
-	router.Use(gin.Logger())
 	router.Use(middleware.CORSMiddleware())
 
 	router.GET("/getById", handler.GetById)

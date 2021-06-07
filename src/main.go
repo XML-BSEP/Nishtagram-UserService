@@ -17,5 +17,5 @@ func main() {
 	appHandler := interactor.NewAppHandler()
 
 	router := router2.NewRouter(appHandler)
-	router.Run("localhost:8082")
+	router.Run(":8082")
 }

@@ -21,6 +21,11 @@ type ProfileInfoUseCase interface {
 	GetUserProfileById(id string, ctx context.Context) (dto.UserProfileDTO, error)
     IsProfilePrivate(username string, ctx context.Context) (bool, error)
 	SaveNewUser(user domain.ProfileInfo, ctx context.Context) error
+	Exists(username string, email string, ctx context.Context) (bool, error)
+}
+
+func (p *profileInfoUseCase) Exists(username string, email string, ctx context.Context) (bool, error) {
+	return p.ProfileInfoRepository.Exists(username, email, ctx)
 }
 
 func (p *profileInfoUseCase) GetByUsername(username string, ctx context.Context) (domain.ProfileInfo, error) {

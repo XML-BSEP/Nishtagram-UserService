@@ -24,7 +24,7 @@ type ProfileInfoUseCase interface {
 	GetByUsername(username string, ctx context.Context) (domain.ProfileInfo, error)
 	GetAllProfiles(ctx context.Context) ([]domain.ProfileInfo, error)
 	GetAllUserProfiles(ctx context.Context) ([]domain.ProfileInfo, error)
-	GetById(id string, ctx context.Context) (domain.ProfileInfo, error)
+	GetById(id string, ctx context.Context) (*domain.ProfileInfo, error)
 	GetUserById(id string, ctx context.Context) (dto.UserDTO, error)
 	GetUserProfileById(id string, ctx context.Context) (dto.UserProfileDTO, error)
     IsProfilePrivate(username string, ctx context.Context) (bool, error)
@@ -34,6 +34,17 @@ type ProfileInfoUseCase interface {
 	GetAllPublicProfiles(ctx context.Context) ([]dto.UserDTO, error)
 	DecodeBase64(media string, userId string, ctx context.Context) (string, error)
 	EditUser(newUser dto.NewUserDTO, ctx context.Context) error
+	IsBanned(user *domain.ProfileInfo, ctx context.Context) bool
+
+}
+
+
+func (p *profileInfoUseCase) IsBanned(user *domain.ProfileInfo, ctx context.Context) bool {
+	if user.Profile.PrivacyPermission == 2 {
+		return true
+	}
+
+	return false
 }
 
 func (p *profileInfoUseCase) Exists(username string, email string, ctx context.Context) (bool, error) {
@@ -52,7 +63,7 @@ func (p *profileInfoUseCase) GetAllUserProfiles(ctx context.Context) ([]domain.P
 	return p.ProfileInfoRepository.GetAllUserProfiles(ctx)
 }
 
-func (p *profileInfoUseCase) GetById(id string, ctx context.Context) (domain.ProfileInfo, error) {
+func (p *profileInfoUseCase) GetById(id string, ctx context.Context) (*domain.ProfileInfo, error) {
 	return  p.ProfileInfoRepository.GetById(id, ctx)
 }
 

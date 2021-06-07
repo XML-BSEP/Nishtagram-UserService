@@ -18,7 +18,7 @@ type ProfileInfoRepository interface {
 	GetByUsername(username string, ctx context.Context) (domain.ProfileInfo, error)
 	GetAllProfiles(ctx context.Context) ([]domain.ProfileInfo, error)
 	GetAllUserProfiles(ctx context.Context) ([]domain.ProfileInfo, error)
-	GetById(id string, ctx context.Context) (domain.ProfileInfo, error)
+	GetById(id string, ctx context.Context) (*domain.ProfileInfo, error)
 	GetUserById(id string, ctx context.Context) (domain.ProfileInfo, error)
 	//GetUserProfileById(id string, ctx context.Context) (dto.UserProfileDTO, error)
 	SaveNewUser(user domain.ProfileInfo, ctx context.Context) error
@@ -107,15 +107,16 @@ func (p *profileInfoRepository) GetAllUserProfiles(ctx context.Context) ([]domai
 	return allProfiles, nil
 }
 
-func (p *profileInfoRepository) GetById(id string, ctx context.Context) (domain.ProfileInfo, error) {
+func (p *profileInfoRepository) GetById(id string, ctx context.Context) (*domain.ProfileInfo, error) {
 	_, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	var profile domain.ProfileInfo
+	var profile *domain.ProfileInfo
 	err := p.collection.FindOne(ctx, bson.M{"_id" : id}).Decode(&profile)
 	if err != nil {
 		return profile, err
 	}
+
 	return profile, nil
 }
 

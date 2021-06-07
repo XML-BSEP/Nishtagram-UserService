@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"user-service/dto"
+	"user-service/infrastructure/mapper"
 	"user-service/usecase"
 )
 
@@ -14,6 +15,26 @@ type profileInfoHandlder struct {
 	ProfileInfoUseCase usecase.ProfileInfoUseCase
 }
 
+func (p *profileInfoHandlder) GetProfileInfoById(ctx *gin.Context) {
+
+	id := ctx.Request.URL.Query().Get("userId")
+
+	val, err := p.ProfileInfoUseCase.GetById(id, ctx)
+
+	if err != nil {
+		ctx.JSON(400, gin.H{"message" : "Can not get profile info"})
+		return
+	}
+
+	if p.ProfileInfoUseCase.IsBanned(val, ctx) {
+		ctx.JSON(400, gin.H{"message" : "User is baned"})
+		return
+	}
+
+	profileInfoDto := mapper.ProfileInfoToProfileInfoDto(val)
+
+	ctx.JSON(200, profileInfoDto)
+}
 
 func (p *profileInfoHandlder) GetProfileUsernameImageById(ctx *gin.Context) {
 	id := ctx.Request.URL.Query().Get("userId")
@@ -197,6 +218,7 @@ type ProfileInfoHandler interface {
 	SaveNewUser(ctx *gin.Context)
 	GetAllPublicProfiles (ctx *gin.Context)
 	EditUser(ctx *gin.Context)
+	GetProfileInfoById(ctx *gin.Context)
 }
 func NewProfileInfoHandler(usecase usecase.ProfileInfoUseCase) ProfileInfoHandler{
 	return &profileInfoHandlder{ProfileInfoUseCase: usecase}

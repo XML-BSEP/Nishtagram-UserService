@@ -1,8 +1,10 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 	"user-service/dto"
 	"user-service/usecase"
@@ -11,7 +13,6 @@ import (
 type profileInfoHandlder struct {
 	ProfileInfoUseCase usecase.ProfileInfoUseCase
 }
-
 
 
 func (p *profileInfoHandlder) GetProfileUsernameImageById(ctx *gin.Context) {
@@ -85,7 +86,7 @@ func (p *profileInfoHandlder) IsPrivate(ctx *gin.Context) {
 
 func (p *profileInfoHandlder) GetUserById(ctx *gin.Context) {
 	id := ctx.Request.URL.Query().Get("userId")
-
+	//DEKODE OVDEE
 	profileDTO, error := p.ProfileInfoUseCase.GetUserById(id, ctx)
 	if error != nil{
 		ctx.JSON(http.StatusNotFound, "No users with that id")
@@ -93,14 +94,14 @@ func (p *profileInfoHandlder) GetUserById(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"data": profileDTO})
+	ctx.JSON(http.StatusOK, profileDTO)
 }
 
 func (p *profileInfoHandlder) GetUserProfileById(ctx *gin.Context) {
 
 	id := ctx.Request.URL.Query().Get("userId")
 
-
+	//DEKODE OVDEE
 	profileUserDTO, error := p.ProfileInfoUseCase.GetUserProfileById(id, ctx)
 	if error != nil{
 		ctx.JSON(http.StatusNotFound, "No users with that id")
@@ -108,20 +109,11 @@ func (p *profileInfoHandlder) GetUserProfileById(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"data": profileUserDTO})
+	ctx.JSON(http.StatusOK, profileUserDTO)
 
 
 }
 
-type ProfileInfoHandler interface {
-	GetProfileInfoByUsername(ctx *gin.Context)
-	GetById(ctx *gin.Context)
-	IsPrivate(ctx *gin.Context)
-	GetProfileUsernameImageById(ctx *gin.Context)
-	GetUserById(ctx *gin.Context)
-	GetUserProfileById(ctx *gin.Context)
-	SaveNewUser(ctx *gin.Context)
-}
 
 func (p *profileInfoHandlder) SaveNewUser(ctx *gin.Context) {
 	var newUserDTO dto.NewUserDTO
@@ -140,6 +132,16 @@ func (p *profileInfoHandlder) SaveNewUser(ctx *gin.Context) {
 		return
 	}
 
+	if newUserDTO.Image != "" {
+		mediaToAttach, err := p.ProfileInfoUseCase.EncodeBase64(newUserDTO.Image, newUserDTO.ID, context.Background())
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, "error while decoding base64")
+			ctx.Abort()
+			return
+		}
+		newUserDTO.Image = mediaToAttach
+	}
+
 	newUserProfile := dto.NewUserDTOtoEntity(newUserDTO)
 
 	error := p.ProfileInfoUseCase.SaveNewUser(newUserProfile, ctx)
@@ -153,7 +155,27 @@ func (p *profileInfoHandlder) SaveNewUser(ctx *gin.Context) {
 
 }
 
+func (p *profileInfoHandlder) GetAllPublicProfiles(ctx *gin.Context) {
+	//DEKODE OVDEE
+	users, err := p.ProfileInfoUseCase.GetAllPublicProfiles(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	ctx.JSON(200, gin.H{"data" : users})
+	return
+}
 
+
+type ProfileInfoHandler interface {
+	GetProfileInfoByUsername(ctx *gin.Context)
+	GetById(ctx *gin.Context)
+	IsPrivate(ctx *gin.Context)
+	GetProfileUsernameImageById(ctx *gin.Context)
+	GetUserById(ctx *gin.Context)
+	GetUserProfileById(ctx *gin.Context)
+	SaveNewUser(ctx *gin.Context)
+	GetAllPublicProfiles (ctx *gin.Context)
+}
 func NewProfileInfoHandler(usecase usecase.ProfileInfoUseCase) ProfileInfoHandler{
 	return &profileInfoHandlder{ProfileInfoUseCase: usecase}
 }

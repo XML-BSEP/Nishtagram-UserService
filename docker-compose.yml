@@ -98,7 +98,7 @@ services:
       - 5001:8091
     volumes:
       - auth-redis-data:/data/db:rw
-      - auth-data:/data/db:rw
+    #  - auth-data:/data/db:rw
 
   followms:
     image: followimg

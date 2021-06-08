@@ -16,6 +16,30 @@ type profileInfoHandlder struct {
 	ProfileInfoUseCase usecase.ProfileInfoUseCase
 }
 
+
+func (p *profileInfoHandlder) SearchUser(ctx *gin.Context) {
+	search := ctx.Request.URL.Query().Get("search")
+
+	users, err := p.ProfileInfoUseCase.SearchUser(search, ctx)
+	if err != nil {
+		ctx.JSON(404, "User does not exists")
+		return
+	}
+
+	var usersDTO []dto.UserDTO
+	for _, user := range users {
+		usersDTO = append(usersDTO, dto.NewUserDTOfromEntity(*user))
+	}
+
+	if len(usersDTO) == 0 {
+		ctx.JSON(404, "User does not exists")
+		return
+	}
+
+	ctx.JSON(200, usersDTO)
+
+}
+
 func (p *profileInfoHandlder) IsPrivatePostMethod(ctx *gin.Context) {
 
 	var privacyCheck dto.PrivacyCheckDto
@@ -242,6 +266,7 @@ type ProfileInfoHandler interface {
 	GetAllPublicProfiles (ctx *gin.Context)
 	EditUser(ctx *gin.Context)
 	GetProfileInfoById(ctx *gin.Context)
+	SearchUser(ctx *gin.Context)
 	IsPrivatePostMethod(ctx *gin.Context)
 }
 func NewProfileInfoHandler(usecase usecase.ProfileInfoUseCase) ProfileInfoHandler{

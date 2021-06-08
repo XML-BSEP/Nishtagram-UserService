@@ -3,7 +3,9 @@ package repository
 import (
 	"context"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"strings"
 	"time"
 	"user-service/domain"
 	"user-service/domain/enum"
@@ -26,7 +28,9 @@ type ProfileInfoRepository interface {
 	Exists(username string, email string, ctx context.Context) (bool, error)
 	GetAllPublicProfiles(ctx context.Context) ([]domain.ProfileInfo, error)
 	EditUser(user domain.ProfileInfo, ctx context.Context) error
+	SearchUser(search string, ctx context.Context) ([]*domain.ProfileInfo, error)
 	IsPrivateById(id string, ctx context.Context) (bool, error)
+
 }
 
 func (p *profileInfoRepository) IsPrivateById(id string, ctx context.Context) (bool, error) {
@@ -256,10 +260,78 @@ func (p *profileInfoRepository) EditUser(user domain.ProfileInfo, ctx context.Co
 
 }
 
+func (p *profileInfoRepository) SearchUser(search string, ctx context.Context) ([]*domain.ProfileInfo, error) {
+	_, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	var foundUsers []*domain.ProfileInfo
+
+	search = strings.TrimSpace(search)
+	splitSearch := strings.Split(search, " ")
+	for _, splitSearchpart := range splitSearch {
+
+		//username
+		filtereds, err := p.collection.Find(ctx, bson.M{"profile.username" : primitive.Regex{Pattern: splitSearchpart, Options: "i"} })
+		if err != nil {
+			return nil, err
+		}
+		var usersUsername []*domain.ProfileInfo
+		if err = filtereds.All(ctx, &usersUsername); err != nil {
+			return nil, err
+		}
+		for _, userOneSlice := range usersUsername {
+			foundUsers = AppendIfMissing(foundUsers, userOneSlice)
+		}
+
+		//name
+		filtereds, err = p.collection.Find(ctx, bson.M{"person.name" : primitive.Regex{Pattern: splitSearchpart, Options: "i"} })
+		if err != nil {
+			return nil, err
+		}
+		var usersName []*domain.ProfileInfo
+		if err = filtereds.All(ctx, &usersName); err != nil {
+			return nil, err
+		}
+		for _, userOneSlice := range usersName {
+			foundUsers = AppendIfMissing(foundUsers, userOneSlice)
+		}
+
+		//surname
+		filtereds, err = p.collection.Find(ctx, bson.M{"person.surname" : primitive.Regex{Pattern: splitSearchpart, Options: "i"} })
+		if err != nil {
+			return nil, err
+		}
+		var usersSurname []*domain.ProfileInfo
+		if err = filtereds.All(ctx, &usersSurname); err != nil {
+			return nil, err
+		}
+		for _, userOneSlice := range usersSurname {
+			foundUsers = AppendIfMissing(foundUsers, userOneSlice)
+		}
+
+
+	}
+
+
+
+	return foundUsers, nil
+
+}
+
 
 func NewProfileInfoRepository(db *mongo.Client) ProfileInfoRepository {
 	return &profileInfoRepository {
 		db : db,
 		collection: db.Database("user_db").Collection("profiles"),
 	}
+}
+
+
+func AppendIfMissing(slice []*domain.ProfileInfo, i *domain.ProfileInfo) []*domain.ProfileInfo {
+	for _, ele := range slice {
+		if ele.ID == i.ID {
+			return slice
+		}
+	}
+	return append(slice, i)
 }

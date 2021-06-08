@@ -35,6 +35,7 @@ type ProfileInfoUseCase interface {
 	DecodeBase64(media string, userId string, ctx context.Context) (string, error)
 	EditUser(newUser dto.NewUserDTO, ctx context.Context) error
 	IsBanned(user *domain.ProfileInfo, ctx context.Context) bool
+	SearchUser(search string, ctx context.Context) ([]*domain.ProfileInfo, error)
 	IsPrivateById(id string, ctx context.Context) (bool, error)
 
 }
@@ -121,7 +122,7 @@ func (p *profileInfoUseCase) SaveNewUser(user domain.ProfileInfo, ctx context.Co
 
 func (p *profileInfoUseCase) EncodeBase64(media string, userId string, ctx context.Context) (string, error) {
 	workingDirectory, _ := os.Getwd()
-	path1 := "../assets"
+	path1 := "./assets"
 	err := os.Chdir(path1)
 	if err != nil {
 		fmt.Println(err)
@@ -183,7 +184,7 @@ func (p *profileInfoUseCase) GetAllPublicProfiles(ctx context.Context) ([]dto.Us
 func (p *profileInfoUseCase) DecodeBase64(media string, userId string, ctx context.Context) (string, error) {
 	workingDirectory, _ := os.Getwd()
 
-	path1 := "../assets"
+	path1 := "./assets"
 	err := os.Chdir(path1)
 	fmt.Println(err)
 
@@ -232,6 +233,11 @@ func (p *profileInfoUseCase) EditUser(newUser dto.NewUserDTO, ctx context.Contex
 	return nil
 
 
+}
+
+
+func (p *profileInfoUseCase) SearchUser(search string, ctx context.Context) ([]*domain.ProfileInfo, error) {
+	return p.ProfileInfoRepository.SearchUser(search, ctx)
 }
 
 func NewProfileInfoUseCase(repo repository.ProfileInfoRepository) ProfileInfoUseCase {

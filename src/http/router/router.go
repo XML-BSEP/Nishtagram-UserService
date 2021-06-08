@@ -9,7 +9,7 @@ import (
 func NewRouter(handler interactor.AppHandler) *gin.Engine {
 	router := gin.Default()
 	router.Use(middleware.CORSMiddleware())
-
+	//router.Use(middleware.AuthMiddleware())
 
 	router.GET("/getById", handler.GetById)
 	router.GET("/getProfileInfoByUsername", handler.GetProfileInfoByUsername)

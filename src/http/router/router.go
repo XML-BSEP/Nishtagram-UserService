@@ -9,6 +9,7 @@ import (
 func NewRouter(handler interactor.AppHandler) *gin.Engine {
 	router := gin.Default()
 	router.Use(middleware.CORSMiddleware())
+	//router.Use(middleware.AuthMiddleware())
 
 	router.GET("/getById", handler.GetById)
 	router.GET("/getProfileInfoByUsername", handler.GetProfileInfoByUsername)
@@ -22,6 +23,7 @@ func NewRouter(handler interactor.AppHandler) *gin.Engine {
 	router.GET("/getProfileInfo", handler.GetProfileInfoById)
 	router.GET("/searchUser", handler.SearchUser)
 	router.GET("/searchPublicUsers", handler.SearchPublicUser)
+
 
 
 	return router

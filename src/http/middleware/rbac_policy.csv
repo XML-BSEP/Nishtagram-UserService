@@ -1,0 +1,10 @@
+p, USER, /getById
+p, USER, /getProfileInfoByUsername
+p, USER, /isPrivate
+p, USER, /getProfileUsernameImageById
+p, USER, /getUserById
+p, USER, /getUserProfileById
+p, USER, /saveNewUser
+p, USER, /getAllPublicUsers
+p, USER, /editUser
+p, USER, /getProfileInfo

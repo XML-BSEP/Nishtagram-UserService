@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -15,20 +16,49 @@ type profileInfoHandlder struct {
 	ProfileInfoUseCase usecase.ProfileInfoUseCase
 }
 
+
 func (p *profileInfoHandlder) SearchUser(ctx *gin.Context) {
 	search := ctx.Request.URL.Query().Get("search")
 
 	users, err := p.ProfileInfoUseCase.SearchUser(search, ctx)
 	if err != nil {
+		ctx.JSON(404, "User does not exists")
 		return
 	}
 
 	var usersDTO []dto.UserDTO
-	for _,user := range users {
+	for _, user := range users {
 		usersDTO = append(usersDTO, dto.NewUserDTOfromEntity(*user))
 	}
 
+	if len(usersDTO) == 0 {
+		ctx.JSON(404, "User does not exists")
+		return
+	}
+
 	ctx.JSON(200, usersDTO)
+
+}
+
+func (p *profileInfoHandlder) IsPrivatePostMethod(ctx *gin.Context) {
+
+	var privacyCheck dto.PrivacyCheckDto
+
+	fmt.Println(ctx.Request.Body)
+
+	if err := json.NewDecoder(ctx.Request.Body).Decode(&privacyCheck); err != nil {
+		ctx.JSON(500, "Error decoding body")
+		return
+	}
+
+	isPrivate, err := p.ProfileInfoUseCase.IsPrivateById(privacyCheck.Id, ctx)
+
+	if err != nil {
+		ctx.JSON(400, gin.H{"message" : "Can not get profile"})
+		return
+	}
+
+	ctx.JSON(200, gin.H{"is_private" : isPrivate})
 
 }
 
@@ -237,6 +267,7 @@ type ProfileInfoHandler interface {
 	EditUser(ctx *gin.Context)
 	GetProfileInfoById(ctx *gin.Context)
 	SearchUser(ctx *gin.Context)
+	IsPrivatePostMethod(ctx *gin.Context)
 }
 func NewProfileInfoHandler(usecase usecase.ProfileInfoUseCase) ProfileInfoHandler{
 	return &profileInfoHandlder{ProfileInfoUseCase: usecase}

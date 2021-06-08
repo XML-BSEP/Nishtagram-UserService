@@ -36,9 +36,13 @@ type ProfileInfoUseCase interface {
 	EditUser(newUser dto.NewUserDTO, ctx context.Context) error
 	IsBanned(user *domain.ProfileInfo, ctx context.Context) bool
 	SearchUser(search string, ctx context.Context) ([]*domain.ProfileInfo, error)
+	IsPrivateById(id string, ctx context.Context) (bool, error)
 
 }
 
+func (p *profileInfoUseCase) IsPrivateById(id string, ctx context.Context) (bool, error) {
+	return p.ProfileInfoRepository.IsPrivateById(id, ctx)
+}
 
 func (p *profileInfoUseCase) IsBanned(user *domain.ProfileInfo, ctx context.Context) bool {
 	if user.Profile.PrivacyPermission == 2 {

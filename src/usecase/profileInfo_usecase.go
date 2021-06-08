@@ -37,6 +37,7 @@ type ProfileInfoUseCase interface {
 	IsBanned(user *domain.ProfileInfo, ctx context.Context) bool
 	SearchUser(search string, ctx context.Context) ([]*domain.ProfileInfo, error)
 	IsPrivateById(id string, ctx context.Context) (bool, error)
+	SearchPublicUsers(search string, ctx context.Context) ([]*domain.ProfileInfo, error)
 
 }
 
@@ -237,7 +238,35 @@ func (p *profileInfoUseCase) EditUser(newUser dto.NewUserDTO, ctx context.Contex
 
 
 func (p *profileInfoUseCase) SearchUser(search string, ctx context.Context) ([]*domain.ProfileInfo, error) {
-	return p.ProfileInfoRepository.SearchUser(search, ctx)
+
+	var notBannedUsers []*domain.ProfileInfo
+	searchedUsers, error := p.ProfileInfoRepository.SearchUser(search, ctx)
+	if error != nil {
+		return nil, error
+	}
+	for _, user := range searchedUsers {
+		if user.Profile.PrivacyPermission.String() != "Banned" {
+			notBannedUsers = append(notBannedUsers, user)
+		}
+	}
+
+	return notBannedUsers, nil
+}
+
+func (p *profileInfoUseCase) SearchPublicUsers(search string, ctx context.Context) ([]*domain.ProfileInfo, error) {
+
+	var publics []*domain.ProfileInfo
+	searchedUsers, error := p.ProfileInfoRepository.SearchUser(search, ctx)
+	if error != nil {
+		return nil, error
+	}
+	for _, user := range searchedUsers {
+		if user.Profile.PrivacyPermission.String() != "Banned" && user.Profile.PrivacyPermission.String() == "Public" {
+			publics = append(publics, user)
+		}
+	}
+
+	return publics, nil
 }
 
 func NewProfileInfoUseCase(repo repository.ProfileInfoRepository) ProfileInfoUseCase {

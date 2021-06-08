@@ -122,7 +122,7 @@ func (p *profileInfoUseCase) SaveNewUser(user domain.ProfileInfo, ctx context.Co
 
 func (p *profileInfoUseCase) EncodeBase64(media string, userId string, ctx context.Context) (string, error) {
 	workingDirectory, _ := os.Getwd()
-	path1 := "../assets"
+	path1 := "./assets"
 	err := os.Chdir(path1)
 	if err != nil {
 		fmt.Println(err)
@@ -184,7 +184,7 @@ func (p *profileInfoUseCase) GetAllPublicProfiles(ctx context.Context) ([]dto.Us
 func (p *profileInfoUseCase) DecodeBase64(media string, userId string, ctx context.Context) (string, error) {
 	workingDirectory, _ := os.Getwd()
 
-	path1 := "../assets"
+	path1 := "./assets"
 	err := os.Chdir(path1)
 	fmt.Println(err)
 

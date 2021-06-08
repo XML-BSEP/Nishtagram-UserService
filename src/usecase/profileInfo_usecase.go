@@ -35,6 +35,7 @@ type ProfileInfoUseCase interface {
 	DecodeBase64(media string, userId string, ctx context.Context) (string, error)
 	EditUser(newUser dto.NewUserDTO, ctx context.Context) error
 	IsBanned(user *domain.ProfileInfo, ctx context.Context) bool
+	SearchUser(search string, ctx context.Context) ([]*domain.ProfileInfo, error)
 
 }
 
@@ -228,6 +229,11 @@ func (p *profileInfoUseCase) EditUser(newUser dto.NewUserDTO, ctx context.Contex
 	return nil
 
 
+}
+
+
+func (p *profileInfoUseCase) SearchUser(search string, ctx context.Context) ([]*domain.ProfileInfo, error) {
+	return p.ProfileInfoRepository.SearchUser(search, ctx)
 }
 
 func NewProfileInfoUseCase(repo repository.ProfileInfoRepository) ProfileInfoUseCase {

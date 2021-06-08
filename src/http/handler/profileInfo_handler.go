@@ -15,6 +15,23 @@ type profileInfoHandlder struct {
 	ProfileInfoUseCase usecase.ProfileInfoUseCase
 }
 
+func (p *profileInfoHandlder) SearchUser(ctx *gin.Context) {
+	search := ctx.Request.URL.Query().Get("search")
+
+	users, err := p.ProfileInfoUseCase.SearchUser(search, ctx)
+	if err != nil {
+		return
+	}
+
+	var usersDTO []dto.UserDTO
+	for _,user := range users {
+		usersDTO = append(usersDTO, dto.NewUserDTOfromEntity(*user))
+	}
+
+	ctx.JSON(200, usersDTO)
+
+}
+
 func (p *profileInfoHandlder) GetProfileInfoById(ctx *gin.Context) {
 
 	id := ctx.Request.URL.Query().Get("userId")
@@ -219,6 +236,7 @@ type ProfileInfoHandler interface {
 	GetAllPublicProfiles (ctx *gin.Context)
 	EditUser(ctx *gin.Context)
 	GetProfileInfoById(ctx *gin.Context)
+	SearchUser(ctx *gin.Context)
 }
 func NewProfileInfoHandler(usecase usecase.ProfileInfoUseCase) ProfileInfoHandler{
 	return &profileInfoHandlder{ProfileInfoUseCase: usecase}

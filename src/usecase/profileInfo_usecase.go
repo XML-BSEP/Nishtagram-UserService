@@ -70,7 +70,12 @@ func (p *profileInfoUseCase) GetAllUserProfiles(ctx context.Context) ([]domain.P
 }
 
 func (p *profileInfoUseCase) GetById(id string, ctx context.Context) (*domain.ProfileInfo, error) {
-	return  p.ProfileInfoRepository.GetById(id, ctx)
+	user, _ :=  p.ProfileInfoRepository.GetById(id, ctx)
+	if user.ProfileImage != "" {
+		encodedImage, _ := p.DecodeBase64(user.ProfileImage, user.ID, ctx)
+		user.ProfileImage = encodedImage
+	}
+	return user, nil
 }
 
 func (p *profileInfoUseCase) GetUserById(id string, ctx context.Context) (dto.UserDTO, error) {
@@ -123,12 +128,15 @@ func (p *profileInfoUseCase) SaveNewUser(user domain.ProfileInfo, ctx context.Co
 
 func (p *profileInfoUseCase) EncodeBase64(media string, userId string, ctx context.Context) (string, error) {
 	workingDirectory, _ := os.Getwd()
-	path1 := "./assets"
-	err := os.Chdir(path1)
-	if err != nil {
-		fmt.Println(err)
+	if !strings.HasSuffix(workingDirectory, "src") {
+		firstPart := strings.Split(workingDirectory, "src")
+		value := firstPart[0] + "src"
+		workingDirectory = value
+		os.Chdir(workingDirectory)
 	}
-	err = os.Mkdir(userId, 0755)
+
+	path1 := "./assets/"
+	err := os.Chdir(path1)
 	fmt.Println(err)
 
 	err = os.Chdir(userId)
@@ -184,12 +192,20 @@ func (p *profileInfoUseCase) GetAllPublicProfiles(ctx context.Context) ([]dto.Us
 
 func (p *profileInfoUseCase) DecodeBase64(media string, userId string, ctx context.Context) (string, error) {
 	workingDirectory, _ := os.Getwd()
+	if !strings.HasSuffix(workingDirectory, "src") {
+		firstPart := strings.Split(workingDirectory, "src")
+		value := firstPart[0] + "src"
+		workingDirectory = value
+		os.Chdir(workingDirectory)
+	}
 
-	path1 := "./assets"
+	path1 := "./assets/"
 	err := os.Chdir(path1)
 	fmt.Println(err)
 
 	err = os.Chdir(userId)
+	fmt.Println(err)
+
 	spliced := strings.Split(media, "/")
 	var f *os.File
 	if len(spliced) > 1 {

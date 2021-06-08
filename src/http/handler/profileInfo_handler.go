@@ -118,7 +118,7 @@ func (p *profileInfoHandlder) GetProfileUsernameImageById(ctx *gin.Context) {
 	var profileUIDTO dto.ProfileUsernameImageDTO
 	profileUIDTO = dto.NewProfileUsernameImage(profile.Profile.Username, profile.ProfileImage)
 
-	ctx.JSON(http.StatusOK, gin.H{"data": profileUIDTO})
+	ctx.JSON(http.StatusOK, profileUIDTO)
 
 
 }

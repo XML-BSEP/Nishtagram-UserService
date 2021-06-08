@@ -21,6 +21,7 @@ func NewRouter(handler interactor.AppHandler) *gin.Engine {
 	router.POST("/editUser", handler.EditUser)
 	router.GET("/getProfileInfo", handler.GetProfileInfoById)
 	router.GET("/searchUser", handler.SearchUser)
+	router.GET("/searchPublicUsers", handler.SearchPublicUser)
 
 
 	return router

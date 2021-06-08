@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -13,6 +14,28 @@ import (
 
 type profileInfoHandlder struct {
 	ProfileInfoUseCase usecase.ProfileInfoUseCase
+}
+
+func (p *profileInfoHandlder) IsPrivatePostMethod(ctx *gin.Context) {
+
+	var privacyCheck dto.PrivacyCheckDto
+
+	fmt.Println(ctx.Request.Body)
+
+	if err := json.NewDecoder(ctx.Request.Body).Decode(&privacyCheck); err != nil {
+		ctx.JSON(500, "Error decoding body")
+		return
+	}
+
+	isPrivate, err := p.ProfileInfoUseCase.IsPrivateById(privacyCheck.Id, ctx)
+
+	if err != nil {
+		ctx.JSON(400, gin.H{"message" : "Can not get profile"})
+		return
+	}
+
+	ctx.JSON(200, gin.H{"is_private" : isPrivate})
+
 }
 
 func (p *profileInfoHandlder) GetProfileInfoById(ctx *gin.Context) {
@@ -219,6 +242,7 @@ type ProfileInfoHandler interface {
 	GetAllPublicProfiles (ctx *gin.Context)
 	EditUser(ctx *gin.Context)
 	GetProfileInfoById(ctx *gin.Context)
+	IsPrivatePostMethod(ctx *gin.Context)
 }
 func NewProfileInfoHandler(usecase usecase.ProfileInfoUseCase) ProfileInfoHandler{
 	return &profileInfoHandlder{ProfileInfoUseCase: usecase}

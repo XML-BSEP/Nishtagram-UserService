@@ -26,7 +26,28 @@ type ProfileInfoRepository interface {
 	Exists(username string, email string, ctx context.Context) (bool, error)
 	GetAllPublicProfiles(ctx context.Context) ([]domain.ProfileInfo, error)
 	EditUser(user domain.ProfileInfo, ctx context.Context) error
+	IsPrivateById(id string, ctx context.Context) (bool, error)
 }
+
+func (p *profileInfoRepository) IsPrivateById(id string, ctx context.Context) (bool, error) {
+	_, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+
+	var profile domain.ProfileInfo
+	err := p.collection.FindOne(ctx, bson.M{"_id" : id}).Decode(&profile)
+	if err != nil {
+		return false, err
+	}
+
+	if profile.Profile.PrivacyPermission.String() == "Private" {
+		return true, nil
+	}
+
+	return false, nil
+
+}
+
 
 func (p *profileInfoRepository) Exists(username string, email string, ctx context.Context) (bool, error){
 	_, cancel := context.WithTimeout(context.Background(), 30*time.Second)

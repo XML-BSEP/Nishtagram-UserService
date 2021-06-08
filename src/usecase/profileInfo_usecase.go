@@ -70,7 +70,12 @@ func (p *profileInfoUseCase) GetAllUserProfiles(ctx context.Context) ([]domain.P
 }
 
 func (p *profileInfoUseCase) GetById(id string, ctx context.Context) (*domain.ProfileInfo, error) {
-	return  p.ProfileInfoRepository.GetById(id, ctx)
+	user, _ :=  p.ProfileInfoRepository.GetById(id, ctx)
+	if user.ProfileImage != "" {
+		encodedImage, _ := p.DecodeBase64(user.ProfileImage, user.ID, ctx)
+		user.ProfileImage = encodedImage
+	}
+	return user, nil
 }
 
 func (p *profileInfoUseCase) GetUserById(id string, ctx context.Context) (dto.UserDTO, error) {

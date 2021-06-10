@@ -262,9 +262,16 @@ func (p *profileInfoUseCase) SearchUser(search string, ctx context.Context) ([]*
 	}
 	for _, user := range searchedUsers {
 		if user.Profile.PrivacyPermission.String() != "Banned" {
+			var encodedImage string
+			if user.ProfileImage != "" {
+				encodedImage, _ = p.DecodeBase64(user.ProfileImage, user.ID, ctx)
+			}else {encodedImage = user.ProfileImage }
+			user.ProfileImage = encodedImage;
 			notBannedUsers = append(notBannedUsers, user)
 		}
 	}
+
+
 
 	return notBannedUsers, nil
 }

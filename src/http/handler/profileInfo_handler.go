@@ -48,9 +48,9 @@ func (p *profileInfoHandlder) SearchUser(ctx *gin.Context) {
 		return
 	}
 
-	var usersDTO []dto.UserDTO
+	var usersDTO []dto.SearchUserDTO
 	for _, user := range users {
-		usersDTO = append(usersDTO, dto.NewUserDTOfromEntity(*user))
+		usersDTO = append(usersDTO, dto.NewSearchUserDTOFromEntity(*user))
 	}
 
 	if len(usersDTO) == 0 {

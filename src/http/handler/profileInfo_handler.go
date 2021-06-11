@@ -269,6 +269,12 @@ func (p *profileInfoHandlder) SaveNewUser(ctx *gin.Context) {
 	newUserDTO.Username = strings.TrimSpace(policy.Sanitize(newUserDTO.Username))
 	newUserDTO.Image = strings.TrimSpace(policy.Sanitize(newUserDTO.Image))
 
+	if newUserDTO.ID == "" || newUserDTO.Name == "" || newUserDTO.Surname == "" || newUserDTO.Email == "" || newUserDTO.Address == "" || newUserDTO.Phone == "" || newUserDTO.Birthday  == "" ||
+		newUserDTO.Gender == "" || newUserDTO.Web == "" || newUserDTO.Bio  == "" ||newUserDTO.Username == "" || newUserDTO.Image == "" {
+		ctx.JSON(400, gin.H{"message" : "Field are empty or xss attack happened"})
+		return
+	}
+
 	if newUserDTO.Birthday == "" {
 		ctx.JSON(400, gin.H{"message" : "Enter birthday!"})
 		return
@@ -355,6 +361,13 @@ func (p *profileInfoHandlder) EditUser(ctx *gin.Context) {
 	newUserDTO.Bio = strings.TrimSpace(policy.Sanitize(newUserDTO.Bio))
 	newUserDTO.Username = strings.TrimSpace(policy.Sanitize(newUserDTO.Username))
 	newUserDTO.Image = strings.TrimSpace(policy.Sanitize(newUserDTO.Image))
+
+	if newUserDTO.ID == "" || newUserDTO.Name == "" || newUserDTO.Surname == "" || newUserDTO.Email == "" || newUserDTO.Address == "" || newUserDTO.Phone == "" || newUserDTO.Birthday  == "" ||
+		newUserDTO.Gender == "" || newUserDTO.Web == "" || newUserDTO.Bio  == "" ||newUserDTO.Username == "" || newUserDTO.Image == "" {
+		ctx.JSON(400, gin.H{"message" : "Field are empty or xss attack happened"})
+		return
+	}
+
 
 	if newUserDTO.Birthday == "" {
 		ctx.JSON(400, gin.H{"message" : "Enter birthday!"})

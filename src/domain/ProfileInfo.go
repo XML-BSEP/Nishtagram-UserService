@@ -4,7 +4,7 @@ import "user-service/domain/enum"
 
 type ProfileInfo struct {
 	ID string `bson:"_id" json:"id"`
-	Email string `bson:"email" json:"email"`
+	Email string `bson:"email" json:"email" validate:"required,email"`
 	Biography string `bson:"biography" json:"biography"`
 	WebPage string `bson:"web_page" json:"web_page"`
 	Category enum.Category `json:"category" bson:"category"`

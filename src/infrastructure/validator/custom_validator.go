@@ -16,18 +16,18 @@ type customValidator struct {
 const (
 	FIRST_NAME = "^[A-Z]{1}[a-z]+$"
 	SURNAME = "^[A-Z]{1}[a-z]+$"
-	USERNAME = "^[a-z]*[0-9]+$"
+	USERNAME = "^[a-z]{4,}[0-9]*$"
 	EMAIL = "([a-zA-Z0-9]+)@([a-zA-Z0-9\\.]+)\\.([a-zA-Z0-9]+)"
 	PHONE = "^[0-9]{3,6}(\\/).[0-9]+$"
 
 )
 
 const (
-	FIRST_NAME_ERROR_MSG = "{0} must be in valid format"
-	SURNAME_ERR_MSG = "{0} must be in valid format"
-	EMAIL_ERR_MSG = "{0} must be in valid format"
-	USERNAME_ERR_MSG = "{0} must be in valid format"
-	PHONE_ERR_MSG = "{0} must be in valid format"
+	FIRST_NAME_ERROR_MSG = "{0} must be in valid format. First letter is uppercase"
+	SURNAME_ERR_MSG = "{0} must be in valid format. First letter is uppercase"
+	EMAIL_ERR_MSG = "{0} must be in valid format. Must contain @ and . Ex: mail@mail.com"
+	USERNAME_ERR_MSG = "{0} must be in valid format. At least 4 small letters with numbers"
+	PHONE_ERR_MSG = "{0} must be in valid format. Must contain 3-6 digits with '/' and more digits"
 
 )
 

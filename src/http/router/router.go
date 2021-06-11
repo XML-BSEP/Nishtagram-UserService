@@ -3,14 +3,15 @@ package router
 import (
 	"github.com/gin-contrib/secure"
 	"github.com/gin-gonic/gin"
+	logger "github.com/jelena-vlajkov/logger/logger"
 	"user-service/http/middleware"
 	"user-service/interactor"
 )
 
-func NewRouter(handler interactor.AppHandler) *gin.Engine {
+func NewRouter(handler interactor.AppHandler, logger *logger.Logger) *gin.Engine {
 	router := gin.Default()
 	router.Use(middleware.CORSMiddleware())
-	//router.Use(middleware.AuthMiddleware())
+	//router.Use(middleware.AuthMiddleware(logger))
 	router.Use(secure.New(secure.DefaultConfig()))
 
 	router.GET("/getById", handler.GetById)

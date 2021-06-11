@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	logger "github.com/jelena-vlajkov/logger/logger"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -14,6 +15,7 @@ import (
 type profileInfoRepository struct {
 	collection *mongo.Collection
 	db *mongo.Client
+	logger *logger.Logger
 }
 
 type ProfileInfoRepository interface {
@@ -41,6 +43,7 @@ func (p *profileInfoRepository) IsPrivateById(id string, ctx context.Context) (b
 	var profile domain.ProfileInfo
 	err := p.collection.FindOne(ctx, bson.M{"_id" : id}).Decode(&profile)
 	if err != nil {
+		p.logger.Logger.Errorf("error while checking is private %v\n", id)
 		return false, err
 	}
 
@@ -61,6 +64,7 @@ func (p *profileInfoRepository) Exists(username string, email string, ctx contex
 	var profile domain.ProfileInfo
 	err := p.collection.FindOne(ctx, bson.M{"profile.username" : username, "email" : email}).Decode(&profile)
 	if err != nil {
+		p.logger.Logger.Errorf("error while checking if exists by username %v and email %v\n", username, email)
 		return false, err
 	}
 	return true, nil
@@ -75,6 +79,7 @@ func (p *profileInfoRepository) IsProfilePrivate(username string, ctx context.Co
 	var profile domain.ProfileInfo
 	err := p.collection.FindOne(ctx, bson.M{"profile.username" : username}).Decode(&profile)
 	if err != nil {
+		p.logger.Logger.Errorf("error while checking is private %v\n", username)
 		return false, err
 	}
 
@@ -93,6 +98,7 @@ func (p *profileInfoRepository) GetByUsername(username string, ctx context.Conte
 	var profile domain.ProfileInfo
 	err := p.collection.FindOne(ctx, bson.M{"profile.username" : username}).Decode(&profile)
 	if err != nil {
+		p.logger.Logger.Errorf("error while getting by username %v\n", username)
 		return profile, err
 	}
 	return profile, nil
@@ -104,11 +110,13 @@ func (p *profileInfoRepository) GetAllProfiles(ctx context.Context) ([]domain.Pr
 
 	profiles , err := p.collection.Find(ctx, bson.M{})
 	if err != nil {
+		p.logger.Logger.Errorf("error while getting all profiles")
 		return nil, err
 	}
 
 	var allProfiles []domain.ProfileInfo
 	if err = profiles.All(ctx, &allProfiles); err != nil {
+		p.logger.Logger.Errorf("error while getting all profiles")
 		return nil, err
 	}
 
@@ -121,11 +129,13 @@ func (p *profileInfoRepository) GetAllUserProfiles(ctx context.Context) ([]domai
 
 	profiles , err := p.collection.Find(ctx, bson.M{"profile.type" : enum.ProfileType(0).String()})
 	if err != nil {
+		p.logger.Logger.Errorf("error while getting by public profile type")
 		return nil, err
 	}
 
 	var allProfiles []domain.ProfileInfo
 	if err = profiles.All(ctx, &allProfiles); err != nil {
+		p.logger.Logger.Errorf("error while getting all profiles")
 		return nil, err
 	}
 
@@ -139,6 +149,7 @@ func (p *profileInfoRepository) GetById(id string, ctx context.Context) (*domain
 	var profile *domain.ProfileInfo
 	err := p.collection.FindOne(ctx, bson.M{"_id" : id}).Decode(&profile)
 	if err != nil {
+		p.logger.Logger.Errorf("error while getting by id %v\n", id)
 		return profile, err
 	}
 
@@ -153,6 +164,7 @@ func (p *profileInfoRepository) GetUserById(id string, ctx context.Context) (dom
 
 	err := p.collection.FindOne(ctx, bson.M{"_id" : id}).Decode(&profile)
 	if err != nil {
+		p.logger.Logger.Errorf("error while getting user by id %v\n", id)
 		return profile, err
 	}
 	/*
@@ -202,6 +214,7 @@ func (p *profileInfoRepository) SaveNewUser(user domain.ProfileInfo, ctx context
 
 	_, err := p.collection.InsertOne(ctx, user)
 	if err != nil {
+		p.logger.Logger.Errorf("error while saving user with username %v\n", user.Profile.Username)
 		return err
 	}
 
@@ -214,11 +227,13 @@ func (p *profileInfoRepository) GetAllPublicProfiles(ctx context.Context) ([]dom
 
 	profiles , err := p.collection.Find(ctx, bson.M{"profile.privacy_permission" : 1})
 	if err != nil {
+		p.logger.Logger.Errorf("error while getting all public profiles")
 		return nil, err
 	}
 
 	var allProfiles []domain.ProfileInfo
 	if err = profiles.All(ctx, &allProfiles); err != nil {
+		p.logger.Logger.Errorf("error while getting all public profiles")
 		return nil, err
 	}
 
@@ -253,6 +268,7 @@ func (p *profileInfoRepository) EditUser(user domain.ProfileInfo, ctx context.Co
 
 	_, err := p.collection.UpdateOne(ctx, userToUpdate, updatedUser)
 	if err != nil {
+		p.logger.Logger.Errorf("error while updating user with username %v\n", user.Profile.Username)
 		return  err
 	}
 
@@ -319,10 +335,11 @@ func (p *profileInfoRepository) SearchUser(search string, ctx context.Context) (
 }
 
 
-func NewProfileInfoRepository(db *mongo.Client) ProfileInfoRepository {
+func NewProfileInfoRepository(db *mongo.Client, logger *logger.Logger) ProfileInfoRepository {
 	return &profileInfoRepository {
 		db : db,
 		collection: db.Database("user_db").Collection("profiles"),
+		logger: logger,
 	}
 }
 

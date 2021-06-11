@@ -1,6 +1,7 @@
 package router
 
 import (
+	"github.com/gin-contrib/secure"
 	"github.com/gin-gonic/gin"
 	"user-service/http/middleware"
 	"user-service/interactor"
@@ -10,6 +11,7 @@ func NewRouter(handler interactor.AppHandler) *gin.Engine {
 	router := gin.Default()
 	router.Use(middleware.CORSMiddleware())
 	//router.Use(middleware.AuthMiddleware())
+	router.Use(secure.New(secure.DefaultConfig()))
 
 	router.GET("/getById", handler.GetById)
 	router.GET("/getProfileInfoByUsername", handler.GetProfileInfoByUsername)

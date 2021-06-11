@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"unicode"
 	"user-service/dto"
 	"user-service/infrastructure/mapper"
 	validator2 "user-service/infrastructure/validator"
@@ -270,8 +271,8 @@ func (p *profileInfoHandlder) SaveNewUser(ctx *gin.Context) {
 	newUserDTO.Image = strings.TrimSpace(policy.Sanitize(newUserDTO.Image))
 
 	if newUserDTO.ID == "" || newUserDTO.Name == "" || newUserDTO.Surname == "" || newUserDTO.Email == "" || newUserDTO.Address == "" || newUserDTO.Phone == "" || newUserDTO.Birthday  == "" ||
-		newUserDTO.Gender == "" || newUserDTO.Web == "" || newUserDTO.Bio  == "" ||newUserDTO.Username == "" || newUserDTO.Image == "" {
-		ctx.JSON(400, gin.H{"message" : "Field are empty or xss attack happened"})
+		newUserDTO.Gender == "" || newUserDTO.Web == "" || newUserDTO.Bio  == "" ||newUserDTO.Username == "" {
+		ctx.JSON(400, gin.H{"message" : "Fields are empty or xss attack happened"})
 		return
 	}
 
@@ -284,6 +285,7 @@ func (p *profileInfoHandlder) SaveNewUser(ctx *gin.Context) {
 		ctx.JSON(400, gin.H{"message" : "Username is not in valid format!"})
 		return
 	}
+
 
 
 	exists, _ := p.ProfileInfoUseCase.Exists(newUserDTO.Username, newUserDTO.Email, ctx)

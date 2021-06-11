@@ -16,7 +16,9 @@ func main() {
 	interactor := interactor2.NewInteractor(mongoCli)
 	appHandler := interactor.NewAppHandler()
 
+
 	router := router2.NewRouter(appHandler)
+
 
 	router.RunTLS(":8082", "certificate/cert.pem", "certificate/key.pem")
 }

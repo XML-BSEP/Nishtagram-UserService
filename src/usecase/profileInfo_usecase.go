@@ -6,8 +6,8 @@ import (
 	"encoding/base64"
 	"fmt"
 	"github.com/google/uuid"
+	logger "github.com/jelena-vlajkov/logger/logger"
 	"io/ioutil"
-	"log"
 	"os"
 	"strings"
 	"user-service/domain"
@@ -17,6 +17,7 @@ import (
 
 type profileInfoUseCase struct {
 	ProfileInfoRepository repository.ProfileInfoRepository
+	logger *logger.Logger
 }
 
 
@@ -42,22 +43,25 @@ type ProfileInfoUseCase interface {
 }
 
 func (p *profileInfoUseCase) IsPrivateById(id string, ctx context.Context) (bool, error) {
+	p.logger.Logger.Infof("is private by id %v\n", id)
 	return p.ProfileInfoRepository.IsPrivateById(id, ctx)
 }
 
 func (p *profileInfoUseCase) IsBanned(user *domain.ProfileInfo, ctx context.Context) bool {
+	p.logger.Logger.Infof("is banned %v\n", user.ID)
 	if user.Profile.PrivacyPermission == 2 {
 		return true
 	}
-
 	return false
 }
 
 func (p *profileInfoUseCase) Exists(username string, email string, ctx context.Context) (bool, error) {
+	p.logger.Logger.Infof("does exist by username %v, and email %v\n", username, email)
 	return p.ProfileInfoRepository.Exists(username, email, ctx)
 }
 
 func (p *profileInfoUseCase) GetByUsername(username string, ctx context.Context) (domain.ProfileInfo, error) {
+	p.logger.Logger.Infof("getting by username %v\n", username)
 	return p.ProfileInfoRepository.GetByUsername(username, ctx)
 }
 
@@ -70,6 +74,7 @@ func (p *profileInfoUseCase) GetAllUserProfiles(ctx context.Context) ([]domain.P
 }
 
 func (p *profileInfoUseCase) GetById(id string, ctx context.Context) (*domain.ProfileInfo, error) {
+	p.logger.Logger.Infof("getting by id %v\n", id)
 	user, _ :=  p.ProfileInfoRepository.GetById(id, ctx)
 	if user.ProfileImage != "" {
 		encodedImage, _ := p.DecodeBase64(user.ProfileImage, user.ID, ctx)
@@ -79,7 +84,7 @@ func (p *profileInfoUseCase) GetById(id string, ctx context.Context) (*domain.Pr
 }
 
 func (p *profileInfoUseCase) GetUserById(id string, ctx context.Context) (dto.UserDTO, error) {
-
+	p.logger.Logger.Infof("getting user by id %v\n", id)
 	profile, _ := p.ProfileInfoRepository.GetUserById(id, ctx)
 
 	var encodedImage string
@@ -96,6 +101,7 @@ func (p *profileInfoUseCase) GetUserById(id string, ctx context.Context) (dto.Us
 }
 
 func (p *profileInfoUseCase) GetUserProfileById(id string, ctx context.Context) (dto.UserProfileDTO, error) {
+	p.logger.Logger.Infof("gettin user profile %v\n", id)
 	profile, _ := p.ProfileInfoRepository.GetUserById(id, ctx)
 
 	var encodedImage string
@@ -119,14 +125,17 @@ func (p *profileInfoUseCase) GetUserProfileById(id string, ctx context.Context) 
 }
 
 func (p *profileInfoUseCase) IsProfilePrivate(username string, ctx context.Context) (bool, error) {
+	p.logger.Logger.Infof("is private by username %v\n", username)
 	return  p.ProfileInfoRepository.IsProfilePrivate(username, ctx)
 }
 
 func (p *profileInfoUseCase) SaveNewUser(user domain.ProfileInfo, ctx context.Context) error {
+	p.logger.Logger.Infof("saving new user with username %v\n", user.Profile.Username)
 	return p.ProfileInfoRepository.SaveNewUser(user, ctx)
 }
 
 func (p *profileInfoUseCase) EncodeBase64(media string, userId string, ctx context.Context) (string, error) {
+	p.logger.Logger.Infof("encoding base64 image for userId %v\n", userId)
 	workingDirectory, _ := os.Getwd()
 	if !strings.HasSuffix(workingDirectory, "src") {
 		firstPart := strings.Split(workingDirectory, "src")
@@ -137,6 +146,10 @@ func (p *profileInfoUseCase) EncodeBase64(media string, userId string, ctx conte
 
 	path1 := "./assets/"
 	err := os.Chdir(path1)
+	if err != nil {
+		p.logger.Logger.Errorf("error while encoding base64 image for userId %v, error: %v\n", userId, err)
+	}
+	err = os.Mkdir(userId, 0755)
 	fmt.Println(err)
 
 	err = os.Chdir(userId)
@@ -147,21 +160,21 @@ func (p *profileInfoUseCase) EncodeBase64(media string, userId string, ctx conte
 	format := strings.Split(a[1], ";")
 	dec, err := base64.StdEncoding.DecodeString(s[1])
 	if err != nil {
-		panic(err)
+		p.logger.Logger.Errorf("error while encoding base64 image for userId %v, error: %v\n", userId, err)
 	}
 	uuid := uuid.NewString()
 	f, err := os.Create(uuid + "." + format[0])
 	if err != nil {
-		panic(err)
+		p.logger.Logger.Errorf("error while encoding base64 image for userId %v, error: %v\n", userId, err)
 	}
 
 	defer f.Close()
 
 	if _, err := f.Write(dec); err != nil {
-		panic(err)
+		p.logger.Logger.Errorf("error while encoding base64 image for userId %v, error: %v\n", userId, err)
 	}
 	if err := f.Sync(); err != nil {
-		panic(err)
+		p.logger.Logger.Errorf("error while encoding base64 image for userId %v, error: %v\n", userId, err)
 	}
 
 	os.Chdir(workingDirectory)
@@ -169,9 +182,10 @@ func (p *profileInfoUseCase) EncodeBase64(media string, userId string, ctx conte
 }
 
 func (p *profileInfoUseCase) GetAllPublicProfiles(ctx context.Context) ([]dto.UserDTO, error) {
+	p.logger.Logger.Infof("getting all public profiles")
 	users, err := p.ProfileInfoRepository.GetAllPublicProfiles(ctx)
 	if err != nil {
-		log.Fatal(err)
+		p.logger.Logger.Errorf("error while getting public profiles, error %v\n", err)
 	}
 
 	var usersDTO []dto.UserDTO
@@ -191,6 +205,8 @@ func (p *profileInfoUseCase) GetAllPublicProfiles(ctx context.Context) ([]dto.Us
 }
 
 func (p *profileInfoUseCase) DecodeBase64(media string, userId string, ctx context.Context) (string, error) {
+	p.logger.Logger.Infof("decoding base64 for image %v and user %v\n", media, userId)
+
 	workingDirectory, _ := os.Getwd()
 	if !strings.HasSuffix(workingDirectory, "src") {
 		firstPart := strings.Split(workingDirectory, "src")
@@ -228,8 +244,10 @@ func (p *profileInfoUseCase) DecodeBase64(media string, userId string, ctx conte
 
 
 func (p *profileInfoUseCase) EditUser(newUser dto.NewUserDTO, ctx context.Context) error {
+	p.logger.Logger.Infof("editing post for user, username %v\n", newUser.Username)
 	_, err := p.GetUserById(newUser.ID, ctx)
 	if err != nil {
+		p.logger.Logger.Errorf("error while getting user by id, error %v\n", err)
 		return err
 	}
 
@@ -238,6 +256,7 @@ func (p *profileInfoUseCase) EditUser(newUser dto.NewUserDTO, ctx context.Contex
 	if editedUser.ProfileImage != "" {
 		image, err := p.EncodeBase64(editedUser.ProfileImage, editedUser.ID, ctx)
 		if err != nil {
+			p.logger.Logger.Errorf("error while encoding edited user image, error %v\n", err)
 			return err
 		}
 		editedUser.ProfileImage = image
@@ -245,6 +264,7 @@ func (p *profileInfoUseCase) EditUser(newUser dto.NewUserDTO, ctx context.Contex
 
 	errRepo := p.ProfileInfoRepository.EditUser(editedUser, ctx)
 	if err != nil {
+		p.logger.Logger.Errorf("error while editting user, error %v\n", err)
 		return errRepo
 	}
 	return nil
@@ -254,10 +274,12 @@ func (p *profileInfoUseCase) EditUser(newUser dto.NewUserDTO, ctx context.Contex
 
 
 func (p *profileInfoUseCase) SearchUser(search string, ctx context.Context) ([]*domain.ProfileInfo, error) {
+	p.logger.Logger.Infof("searching users, search = %v\n", search)
 
 	var notBannedUsers []*domain.ProfileInfo
 	searchedUsers, error := p.ProfileInfoRepository.SearchUser(search, ctx)
 	if error != nil {
+		p.logger.Logger.Errorf("getting searchhed users, error %v\n", error)
 		return nil, error
 	}
 	for _, user := range searchedUsers {
@@ -277,10 +299,12 @@ func (p *profileInfoUseCase) SearchUser(search string, ctx context.Context) ([]*
 }
 
 func (p *profileInfoUseCase) SearchPublicUsers(search string, ctx context.Context) ([]*domain.ProfileInfo, error) {
+	p.logger.Logger.Infof("searching public users, search = %v\n", search)
 
 	var publics []*domain.ProfileInfo
 	searchedUsers, error := p.ProfileInfoRepository.SearchUser(search, ctx)
 	if error != nil {
+		p.logger.Logger.Errorf("getting searched public users, error %v\n", error)
 		return nil, error
 	}
 	for _, user := range searchedUsers {
@@ -292,7 +316,7 @@ func (p *profileInfoUseCase) SearchPublicUsers(search string, ctx context.Contex
 	return publics, nil
 }
 
-func NewProfileInfoUseCase(repo repository.ProfileInfoRepository) ProfileInfoUseCase {
-	return &profileInfoUseCase{ ProfileInfoRepository: repo}
+func NewProfileInfoUseCase(repo repository.ProfileInfoRepository, logger *logger.Logger) ProfileInfoUseCase {
+	return &profileInfoUseCase{ ProfileInfoRepository: repo, logger: logger}
 }
 

@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	logger "github.com/jelena-vlajkov/logger/logger"
 	"github.com/microcosm-cc/bluemonday"
 	"log"
 	"net/http"
 	"strings"
-	"unicode"
 	"user-service/dto"
 	"user-service/infrastructure/mapper"
 	validator2 "user-service/infrastructure/validator"
@@ -18,17 +18,19 @@ import (
 
 type profileInfoHandlder struct {
 	ProfileInfoUseCase usecase.ProfileInfoUseCase
+	logger *logger.Logger
 }
 
 func (p *profileInfoHandlder) SearchPublicUser(ctx *gin.Context) {
+	p.logger.Logger.Println("Handling SEARCH PUBLIC USERS")
 	search := ctx.Request.URL.Query().Get("search")
-	/*policy := bluemonday.UGCPolicy()
-		email := strings.TrimSpace(policy.Sanitize(req.Email))*/
+
 	policy := bluemonday.UGCPolicy()
 	search = strings.TrimSpace(policy.Sanitize(search))
 
 	users, err := p.ProfileInfoUseCase.SearchPublicUsers(search, ctx)
 	if err != nil {
+		p.logger.Logger.Errorf("user does not exists, error: %v\n", err)
 		ctx.JSON(404, "User does not exists")
 		return
 	}
@@ -39,6 +41,7 @@ func (p *profileInfoHandlder) SearchPublicUser(ctx *gin.Context) {
 	}
 
 	if len(usersDTO) == 0 {
+		p.logger.Logger.Errorf("user does not exists, error: %v\n", err)
 		ctx.JSON(404, "User does not exists")
 		return
 	}
@@ -48,6 +51,7 @@ func (p *profileInfoHandlder) SearchPublicUser(ctx *gin.Context) {
 }
 
 func (p *profileInfoHandlder) SearchUser(ctx *gin.Context) {
+	p.logger.Logger.Println("Handling SEARCH USERS")
 	search := ctx.Request.URL.Query().Get("search")
 
 	policy := bluemonday.UGCPolicy()
@@ -55,6 +59,7 @@ func (p *profileInfoHandlder) SearchUser(ctx *gin.Context) {
 
 	users, err := p.ProfileInfoUseCase.SearchUser(search, ctx)
 	if err != nil {
+		p.logger.Logger.Errorf("user does not exists, error: %v\n", err)
 		ctx.JSON(404, "User does not exists")
 		return
 	}
@@ -65,6 +70,7 @@ func (p *profileInfoHandlder) SearchUser(ctx *gin.Context) {
 	}
 
 	if len(usersDTO) == 0 {
+		p.logger.Logger.Errorf("user does not exists, error: %v\n", err)
 		ctx.JSON(404, "User does not exists")
 		return
 	}
@@ -74,12 +80,13 @@ func (p *profileInfoHandlder) SearchUser(ctx *gin.Context) {
 }
 
 func (p *profileInfoHandlder) IsPrivatePostMethod(ctx *gin.Context) {
-
+	p.logger.Logger.Println("Handling IS PRIVATE POST METHOD")
 	var privacyCheck dto.PrivacyCheckDto
 
 	fmt.Println(ctx.Request.Body)
 
 	if err := json.NewDecoder(ctx.Request.Body).Decode(&privacyCheck); err != nil {
+		p.logger.Logger.Errorf("error while decoding json, error: %v\n", err)
 		ctx.JSON(500, "Error decoding body")
 		return
 	}
@@ -91,6 +98,7 @@ func (p *profileInfoHandlder) IsPrivatePostMethod(ctx *gin.Context) {
 	isPrivate, err := p.ProfileInfoUseCase.IsPrivateById(privacyCheck.Id, ctx)
 
 	if err != nil {
+		p.logger.Logger.Errorf("can not get profile, error: %v\n", err)
 		ctx.JSON(400, gin.H{"message" : "Can not get profile"})
 		return
 	}
@@ -100,7 +108,7 @@ func (p *profileInfoHandlder) IsPrivatePostMethod(ctx *gin.Context) {
 }
 
 func (p *profileInfoHandlder) GetProfileInfoById(ctx *gin.Context) {
-
+	p.logger.Logger.Println("Handling GETTING PROFILE INFO BY ID")
 	id := ctx.Request.URL.Query().Get("userId")
 
 	policy := bluemonday.UGCPolicy()
@@ -109,11 +117,13 @@ func (p *profileInfoHandlder) GetProfileInfoById(ctx *gin.Context) {
 	val, err := p.ProfileInfoUseCase.GetById(id, ctx)
 
 	if err != nil {
+		p.logger.Logger.Errorf("can not get profile info, error: %v\n", err)
 		ctx.JSON(400, gin.H{"message" : "Can not get profile info"})
 		return
 	}
 
 	if p.ProfileInfoUseCase.IsBanned(val, ctx) {
+		p.logger.Logger.Errorf("user is baned, error: %v\n", err)
 		ctx.JSON(400, gin.H{"message" : "User is baned"})
 		return
 	}
@@ -124,6 +134,8 @@ func (p *profileInfoHandlder) GetProfileInfoById(ctx *gin.Context) {
 }
 
 func (p *profileInfoHandlder) GetProfileUsernameImageById(ctx *gin.Context) {
+	p.logger.Logger.Println("Handling GETTING PROFILE USERNAME AND IMAGE BY ID")
+
 	id := ctx.Request.URL.Query().Get("userId")
 
 	policy := bluemonday.UGCPolicy()
@@ -131,6 +143,7 @@ func (p *profileInfoHandlder) GetProfileUsernameImageById(ctx *gin.Context) {
 
 	profile, err1 := p.ProfileInfoUseCase.GetById(id, ctx)
 	if err1 != nil {
+		p.logger.Logger.Errorf("no users with that id, error: %v\n", err1)
 		ctx.JSON(http.StatusNotFound, "No users with that id")
 		ctx.Abort()
 		return
@@ -145,6 +158,8 @@ func (p *profileInfoHandlder) GetProfileUsernameImageById(ctx *gin.Context) {
 }
 
 func (p *profileInfoHandlder) GetProfileInfoByUsername(ctx *gin.Context) {
+	p.logger.Logger.Println("Handling GETTING PROFILE INFO BY USERNAME")
+
 	username := ctx.Request.URL.Query().Get("username")
 
 	policy := bluemonday.UGCPolicy()
@@ -154,6 +169,7 @@ func (p *profileInfoHandlder) GetProfileInfoByUsername(ctx *gin.Context) {
 	profileInfo, err := p.ProfileInfoUseCase.GetByUsername(username, ctx)
 
 	if err != nil {
+		p.logger.Logger.Errorf("no users with that username, error: %v\n", err)
 		ctx.JSON(http.StatusNotFound, "No users with that username")
 		ctx.Abort()
 		return
@@ -164,6 +180,7 @@ func (p *profileInfoHandlder) GetProfileInfoByUsername(ctx *gin.Context) {
 }
 
 func (p *profileInfoHandlder) GetById(ctx *gin.Context) {
+	p.logger.Logger.Println("Handling GETTING PROFILE BY ID")
 	id := ctx.Request.URL.Query().Get("userId")
 
 	policy := bluemonday.UGCPolicy()
@@ -172,6 +189,7 @@ func (p *profileInfoHandlder) GetById(ctx *gin.Context) {
 	profileInfo, err := p.ProfileInfoUseCase.GetById(id, ctx)
 
 	if err != nil {
+		p.logger.Logger.Errorf("no users with that id, error: %v\n", err)
 		ctx.JSON(http.StatusNotFound, "No users with that id")
 		ctx.Abort()
 		return
@@ -181,6 +199,8 @@ func (p *profileInfoHandlder) GetById(ctx *gin.Context) {
 }
 
 func (p *profileInfoHandlder) IsPrivate(ctx *gin.Context) {
+	p.logger.Logger.Println("Handling IS PROFILE PRIVATE")
+
 	id := ctx.Request.URL.Query().Get("userId")
 
 	policy := bluemonday.UGCPolicy()
@@ -190,6 +210,7 @@ func (p *profileInfoHandlder) IsPrivate(ctx *gin.Context) {
 	profile, err1 := p.ProfileInfoUseCase.GetById(id, ctx)
 
 	if err1 != nil {
+		p.logger.Logger.Errorf("no users with that id, error: %v\n", err1)
 		ctx.JSON(http.StatusNotFound, "No users with that id")
 		ctx.Abort()
 		return
@@ -197,6 +218,7 @@ func (p *profileInfoHandlder) IsPrivate(ctx *gin.Context) {
 
 	isPrivate, err2 := p.ProfileInfoUseCase.IsProfilePrivate(profile.Profile.Username, ctx)
 	if err2 != nil {
+		p.logger.Logger.Errorf("no users with that id, error: %v\n", err2)
 		ctx.JSON(http.StatusNotFound, "No users with that id")
 		ctx.Abort()
 		return
@@ -207,15 +229,17 @@ func (p *profileInfoHandlder) IsPrivate(ctx *gin.Context) {
 }
 
 func (p *profileInfoHandlder) GetUserById(ctx *gin.Context) {
+	p.logger.Logger.Println("Handling GETTING USER BY ID")
 	id := ctx.Request.URL.Query().Get("userId")
 
 	policy := bluemonday.UGCPolicy()
 	id = strings.TrimSpace(policy.Sanitize(id))
 
 
-	//DEKODE OVDEE
+	//DEKODER OVDE
 	profileDTO, error := p.ProfileInfoUseCase.GetUserById(id, ctx)
 	if error != nil{
+		p.logger.Logger.Errorf("no users with that id, error: %v\n", error)
 		ctx.JSON(http.StatusNotFound, "No users with that id")
 		ctx.Abort()
 		return
@@ -225,6 +249,7 @@ func (p *profileInfoHandlder) GetUserById(ctx *gin.Context) {
 }
 
 func (p *profileInfoHandlder) GetUserProfileById(ctx *gin.Context) {
+	p.logger.Logger.Println("Handling GETTING USER PROFILE ID")
 
 	id := ctx.Request.URL.Query().Get("userId")
 	policy := bluemonday.UGCPolicy()
@@ -234,6 +259,7 @@ func (p *profileInfoHandlder) GetUserProfileById(ctx *gin.Context) {
 	//DEKODE OVDEE
 	profileUserDTO, error := p.ProfileInfoUseCase.GetUserProfileById(id, ctx)
 	if error != nil{
+		p.logger.Logger.Errorf("no users with that id, error: %v\n", error)
 		ctx.JSON(http.StatusNotFound, "No users with that id")
 		ctx.Abort()
 		return
@@ -245,11 +271,14 @@ func (p *profileInfoHandlder) GetUserProfileById(ctx *gin.Context) {
 }
 
 func (p *profileInfoHandlder) SaveNewUser(ctx *gin.Context) {
+	p.logger.Logger.Println("Handling SAVING NEW USER")
+
 	var newUserDTO dto.NewUserDTO
 
 
 	err := json.NewDecoder(ctx.Request.Body).Decode(&newUserDTO)
 	if err != nil {
+		p.logger.Logger.Errorf("error while decoding json, error: %v\n", err)
 		ctx.JSON(http.StatusBadRequest, "Decoding error")
 		ctx.Abort()
 		return
@@ -272,6 +301,7 @@ func (p *profileInfoHandlder) SaveNewUser(ctx *gin.Context) {
 
 	if newUserDTO.ID == "" || newUserDTO.Name == "" || newUserDTO.Surname == "" || newUserDTO.Email == "" || newUserDTO.Address == "" || newUserDTO.Phone == "" || newUserDTO.Birthday  == "" ||
 		newUserDTO.Gender == "" || newUserDTO.Web == "" || newUserDTO.Bio  == "" ||newUserDTO.Username == "" {
+		p.logger.Logger.Errorf("fields are empty or xss attack happened")
 		ctx.JSON(400, gin.H{"message" : "Fields are empty or xss attack happened"})
 		return
 	}
@@ -282,6 +312,7 @@ func (p *profileInfoHandlder) SaveNewUser(ctx *gin.Context) {
 	}
 
 	if strings.Contains(newUserDTO.Username, " ") {
+		p.logger.Logger.Errorf("username is not in valid format!")
 		ctx.JSON(400, gin.H{"message" : "Username is not in valid format!"})
 		return
 	}
@@ -291,6 +322,7 @@ func (p *profileInfoHandlder) SaveNewUser(ctx *gin.Context) {
 	exists, _ := p.ProfileInfoUseCase.Exists(newUserDTO.Username, newUserDTO.Email, ctx)
 
 	if exists {
+		p.logger.Logger.Errorf("user already exists")
 		ctx.JSON(400, gin.H{"message" : "User already exists"})
 		return
 	}
@@ -298,6 +330,7 @@ func (p *profileInfoHandlder) SaveNewUser(ctx *gin.Context) {
 	if newUserDTO.Image != "" {
 		mediaToAttach, err := p.ProfileInfoUseCase.EncodeBase64(newUserDTO.Image, newUserDTO.ID, context.Background())
 		if err != nil {
+			p.logger.Logger.Errorf("error while decoding base64, error: %v\n", err)
 			ctx.JSON(http.StatusBadRequest, "error while decoding base64")
 			ctx.Abort()
 			return
@@ -314,12 +347,14 @@ func (p *profileInfoHandlder) SaveNewUser(ctx *gin.Context) {
 	errorsString := customValidator.GetErrorsString(errs)
 
 	if errValidation != nil {
+		p.logger.Logger.Errorf("error while validating, error: %v\n", errorsString[0])
 		ctx.JSON(400, gin.H{"message" : errorsString[0]})
 		return
 	}
 
 	error := p.ProfileInfoUseCase.SaveNewUser(newUserProfile, ctx)
 	if error != nil {
+		p.logger.Logger.Errorf("error while saving new user, error: %v\n", error)
 		ctx.JSON(http.StatusNotFound, "Failed to save")
 		ctx.Abort()
 		return
@@ -340,10 +375,13 @@ func (p *profileInfoHandlder) GetAllPublicProfiles(ctx *gin.Context) {
 }
 
 func (p *profileInfoHandlder) EditUser(ctx *gin.Context) {
+	p.logger.Logger.Println("Handling EDITING USER")
+
 	var newUserDTO dto.NewUserDTO
 
 	err := json.NewDecoder(ctx.Request.Body).Decode(&newUserDTO)
 	if err != nil {
+		p.logger.Logger.Errorf("error while decoding json, error: %v\n", err)
 		ctx.JSON(http.StatusBadRequest, "Decoding error")
 		ctx.Abort()
 		return
@@ -366,6 +404,7 @@ func (p *profileInfoHandlder) EditUser(ctx *gin.Context) {
 
 	if newUserDTO.ID == "" || newUserDTO.Name == "" || newUserDTO.Surname == "" || newUserDTO.Email == "" || newUserDTO.Address == "" || newUserDTO.Phone == "" || newUserDTO.Birthday  == "" ||
 		newUserDTO.Gender == "" || newUserDTO.Web == "" || newUserDTO.Bio  == "" ||newUserDTO.Username == "" || newUserDTO.Image == "" {
+		p.logger.Logger.Errorf("fields are empty or xss attack happeed")
 		ctx.JSON(400, gin.H{"message" : "Field are empty or xss attack happened"})
 		return
 	}
@@ -388,12 +427,14 @@ func (p *profileInfoHandlder) EditUser(ctx *gin.Context) {
 	errorsString := customValidator.GetErrorsString(errs)
 
 	if errValidation != nil {
+		p.logger.Logger.Errorf("error while decoding json, error: %v\n", errorsString[0])
 		ctx.JSON(400, gin.H{"message" : errorsString[0]})
 		return
 	}
 
 	error := p.ProfileInfoUseCase.EditUser(newUserDTO, ctx)
 	if error != nil {
+		p.logger.Logger.Errorf("error while decoding json, error: %v\n", error)
 		ctx.JSON(http.StatusNotFound, "Failed to edit")
 		ctx.Abort()
 		return
@@ -418,6 +459,6 @@ type ProfileInfoHandler interface {
 	IsPrivatePostMethod(ctx *gin.Context)
 	SearchPublicUser(ctx *gin.Context)
 }
-func NewProfileInfoHandler(usecase usecase.ProfileInfoUseCase) ProfileInfoHandler{
-	return &profileInfoHandlder{ProfileInfoUseCase: usecase}
+func NewProfileInfoHandler(usecase usecase.ProfileInfoUseCase, logger *logger.Logger) ProfileInfoHandler{
+	return &profileInfoHandlder{ProfileInfoUseCase: usecase, logger: logger}
 }

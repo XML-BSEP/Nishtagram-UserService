@@ -1,6 +1,7 @@
 package interactor
 
 import (
+	logger "github.com/jelena-vlajkov/logger/logger"
 	"go.mongodb.org/mongo-driver/mongo"
 	"user-service/http/handler"
 	"user-service/repository"
@@ -9,6 +10,7 @@ import (
 
 type interactor struct {
 	db *mongo.Client
+	logger *logger.Logger
 }
 
 
@@ -25,23 +27,20 @@ type Interactor interface {
 }
 
 
-func NewInteractor(db *mongo.Client) Interactor {
-	return &interactor{db: db}
+func NewInteractor(db *mongo.Client, logger *logger.Logger) Interactor {
+	return &interactor{db: db, logger: logger}
 }
 
-
-
-
 func (i *interactor) NewProfileInfoRepository() repository.ProfileInfoRepository {
-	return repository.NewProfileInfoRepository(i.db)
+	return repository.NewProfileInfoRepository(i.db, i.logger)
 }
 
 func (i *interactor) NewProfileInfoUseCase() usecase.ProfileInfoUseCase {
-	return usecase.NewProfileInfoUseCase(i.NewProfileInfoRepository())
+	return usecase.NewProfileInfoUseCase(i.NewProfileInfoRepository(), i.logger)
 }
 
 func (i *interactor) NewProfileInfoHandler() handler.ProfileInfoHandler {
-	return handler.NewProfileInfoHandler(i.NewProfileInfoUseCase())
+	return handler.NewProfileInfoHandler(i.NewProfileInfoUseCase(), i.logger)
 }
 
 type appHandler struct {

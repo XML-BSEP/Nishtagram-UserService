@@ -194,7 +194,7 @@ func (p *profileInfoUseCase) DecodeBase64(media string, userId string, ctx conte
 	workingDirectory, _ := os.Getwd()
 	if !strings.HasSuffix(workingDirectory, "src") {
 		firstPart := strings.Split(workingDirectory, "src")
-		value := firstPart[0] + "/src"
+		value := firstPart[0] + "//src"
 		workingDirectory = value
 		os.Chdir(workingDirectory)
 	}

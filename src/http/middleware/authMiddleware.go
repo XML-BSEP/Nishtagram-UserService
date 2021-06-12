@@ -62,8 +62,18 @@ func enforce(role string, obj string, act string) (bool, error) {
 func ExtractToken(r *http.Request) string {
 	bearToken := r.Header.Get("Authorization")
 	strArr := strings.Split(bearToken, " ")
-	if len(strArr) == 2 {
+	if len(strArr) == 2{
 		return strArr[1]
+	} else {
+		if len(strArr) == 1 {
+			if strArr[0] != "" {
+				strArr2 := strings.Split(strArr[0], "\"")
+				if len(strArr2) == 1 {
+					return strArr2[0]
+				}
+				return strArr2[1]
+			}
+		}
 	}
 	return ""
 }

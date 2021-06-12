@@ -11,7 +11,7 @@ import (
 func NewRouter(handler interactor.AppHandler, logger *logger.Logger) *gin.Engine {
 	router := gin.Default()
 	router.Use(middleware.CORSMiddleware())
-	//router.Use(middleware.AuthMiddleware(logger))
+	router.Use(middleware.AuthMiddleware(logger))
 	router.Use(secure.New(secure.DefaultConfig()))
 
 	router.GET("/getById", handler.GetById)

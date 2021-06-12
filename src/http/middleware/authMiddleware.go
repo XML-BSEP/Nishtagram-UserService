@@ -67,14 +67,25 @@ func enforce(role string, obj string, act string, logger *logger.Logger) (bool, 
 func ExtractToken(r *http.Request) string {
 	bearToken := r.Header.Get("Authorization")
 	strArr := strings.Split(bearToken, " ")
-	if len(strArr) == 2 {
+	if len(strArr) == 2{
 		return strArr[1]
+	} else {
+		if len(strArr) == 1 {
+			if strArr[0] != "" {
+				strArr2 := strings.Split(strArr[0], "\"")
+
+				return strArr2[1]
+			}
+		}
 	}
 	return ""
 }
 
 func ExtractRole(r *http.Request, logger *logger.Logger) (string, error) {
 	tokenString := ExtractToken(r)
+	if tokenString == "" {
+		return "ANONYMOUS", nil
+	}
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -91,12 +102,12 @@ func ExtractRole(r *http.Request, logger *logger.Logger) (string, error) {
 		role, ok := claims["role"].(string)
 		if !ok {
 			logger.Logger.Error("error while reading role from token")
-			return "", err
+			return "ANONYMOUS", err
 		}
 
-		return role, nil
+		return strings.ToUpper(role), nil
 	}
-	return "", err
+	return "ANONYMOUS", err
 }
 
 func ExtractUserId(r *http.Request, logger *logger.Logger) (string, error) {

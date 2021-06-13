@@ -25,5 +25,5 @@ func main() {
 	router := router2.NewRouter(appHandler, logger)
 
 
-	router.RunTLS(":8082", "certificate/cert.pem", "certificate/key.pem")
+	router.RunTLS(":8082", "src/certificate/cert.pem", "src/certificate/key.pem")
 }

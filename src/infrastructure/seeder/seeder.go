@@ -21,8 +21,6 @@ func DropDatabase(db string, mongoCli *mongo.Client, ctx *context.Context){
 func SeedData(db string, mongoCli *mongo.Client, ctx *context.Context) {
 	DropDatabase(db, mongoCli, ctx)
 
-
-
 	if cnt,_ := mongoCli.Database(db).Collection("profiles").EstimatedDocumentCount(*ctx, nil); cnt == 0 {
 		personCollection := mongoCli.Database(db).Collection("profiles")
 		seedProfileInfo(personCollection, ctx)

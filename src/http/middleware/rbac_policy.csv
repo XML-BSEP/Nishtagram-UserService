@@ -1,6 +1,6 @@
 p, USER, /getById, *
 p, USER, /getProfileInfoByUsername, *
-p, USER, /isPrivate, *
+p, ANONYMOUS, /isPrivate, *
 p, ANONYMOUS, /getProfileUsernameImageById, *
 p, USER, /getUserById, *
 p, USER, /getUserProfileById, *

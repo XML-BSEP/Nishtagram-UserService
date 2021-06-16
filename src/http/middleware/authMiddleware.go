@@ -39,7 +39,7 @@ func AuthMiddleware(logger *logger.Logger) gin.HandlerFunc {
 		}
 
 		if !ok {
-			logger.Logger.Errorf("forbidden request from IP address: %v", c.Request.Host)
+			logger.Logger.Errorf("forbidden request from IP address: %v", c.Request.Form)
 			c.JSON(403, gin.H{"message" : "forbidden"})
 			c.Abort()
 			return
@@ -55,10 +55,11 @@ func enforce(role string, obj string, act string, logger *logger.Logger) (bool, 
 
 	if !strings.HasSuffix(m, "src")  {
 		splits := strings.Split(m, "src")
-		wd := splits[0] + "/src"
+		wd := splits[0] + "\\src"
 		fmt.Println(wd)
 		os.Chdir(wd)
 	}
+
 	enforcer, err := casbin.NewEnforcer("http/middleware/rbac_model.conf", "http/middleware/rbac_policy.csv")
 	if err != nil {
 		logger.Logger.Errorf("failed to load policy from file: %v", err)

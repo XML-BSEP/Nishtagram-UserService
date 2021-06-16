@@ -8,3 +8,5 @@ p, ANONYMOUS, /saveNewUser, *
 p, USER, /getAllPublicUsers, *
 p, USER, /editUser, *
 p, USER, /getProfileInfo, *
+p, USER, /searchUser, *
+p, ANONYMOUS, /searchUser, *

@@ -11,7 +11,7 @@ import (
 func NewRouter(handler interactor.AppHandler, logger *logger.Logger) *gin.Engine {
 	router := gin.Default()
 	router.Use(middleware.CORSMiddleware())
-	router.Use(middleware.AuthMiddleware(logger))
+//	router.Use(middleware.AuthMiddleware(logger))
 	router.Use(secure.New(secure.DefaultConfig()))
 
 	router.GET("/getById", handler.GetById)
@@ -26,6 +26,9 @@ func NewRouter(handler interactor.AppHandler, logger *logger.Logger) *gin.Engine
 	router.GET("/getProfileInfo", handler.GetProfileInfoById)
 	router.GET("/searchUser", handler.SearchUser)
 	router.GET("/searchPublicUsers", handler.SearchPublicUser)
+	router.GET("/getAllRequestVerificationsForWaiting", handler.GetAllRequestVerificationForWaiting)
+	router.GET("/getAllRequestVerifications", handler.GetAllRequestVerification)
+	router.POST("/saveNewRequestVerification", handler.SaveNewVerificationRequest)
 
 
 

@@ -14,14 +14,17 @@ type interactor struct {
 }
 
 
+
 type Interactor interface {
 
 	NewProfileInfoRepository() repository.ProfileInfoRepository
+	NewRequestVerificationRepository() repository.RequestVerificationRepository
 
 	NewProfileInfoUseCase() usecase.ProfileInfoUseCase
-
+	NewRequestVerificationUseCase() usecase.RequestVerificationUseCase
 
 	NewProfileInfoHandler() handler.ProfileInfoHandler
+	NewRequestVerificationHandler() handler.RequestVerificationHandler
 
 	NewAppHandler() AppHandler
 }
@@ -35,27 +38,42 @@ func (i *interactor) NewProfileInfoRepository() repository.ProfileInfoRepository
 	return repository.NewProfileInfoRepository(i.db, i.logger)
 }
 
+func (i *interactor) NewRequestVerificationRepository() repository.RequestVerificationRepository {
+	return repository.NewRequestVerificationRepository(i.db)
+}
+
 func (i *interactor) NewProfileInfoUseCase() usecase.ProfileInfoUseCase {
 	return usecase.NewProfileInfoUseCase(i.NewProfileInfoRepository(), i.logger)
+}
+
+func (i *interactor) NewRequestVerificationUseCase() usecase.RequestVerificationUseCase {
+	return  usecase.NewRequestVerificationUseCase(i.NewRequestVerificationRepository())
 }
 
 func (i *interactor) NewProfileInfoHandler() handler.ProfileInfoHandler {
 	return handler.NewProfileInfoHandler(i.NewProfileInfoUseCase(), i.logger)
 }
+func (i *interactor) NewRequestVerificationHandler() handler.RequestVerificationHandler {
+	return handler.NewRequestVerificationHandler(i.NewRequestVerificationUseCase())
+}
 
 type appHandler struct {
 	handler.ProfileInfoHandler
+	handler.RequestVerificationHandler
 
 }
 
 type AppHandler interface {
 	handler.ProfileInfoHandler
+	handler.RequestVerificationHandler
 
 }
 
 func (i *interactor) NewAppHandler() AppHandler{
 	appHandler := &appHandler{}
 	appHandler.ProfileInfoHandler = i.NewProfileInfoHandler()
+	appHandler.RequestVerificationHandler = i.NewRequestVerificationHandler()
+
 
 	return appHandler
 }

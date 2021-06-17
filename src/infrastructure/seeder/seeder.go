@@ -265,6 +265,9 @@ func seedRequestVerification(tags *mongo.Collection, ctx *context.Context) {
 			{"surname", "Peric"},
 			{"category", enum.Category(0)},
 			{"image", ""},
+			{"state", enum.VerificationState(0)},
+			{"profile_id", "e2b5f92e-c31b-11eb-8529-0242ac130003"},
+
 		},
 	})
 

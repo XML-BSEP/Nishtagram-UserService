@@ -47,7 +47,7 @@ func (i *interactor) NewProfileInfoUseCase() usecase.ProfileInfoUseCase {
 }
 
 func (i *interactor) NewRequestVerificationUseCase() usecase.RequestVerificationUseCase {
-	return  usecase.NewRequestVerificationUseCase(i.NewRequestVerificationRepository())
+	return  usecase.NewRequestVerificationUseCase(i.NewRequestVerificationRepository(), i.NewProfileInfoRepository())
 }
 
 func (i *interactor) NewProfileInfoHandler() handler.ProfileInfoHandler {

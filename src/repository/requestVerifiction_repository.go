@@ -14,6 +14,8 @@ type requestVerificationRepository struct {
 	db *mongo.Client
 }
 
+
+
 type RequestVerificationRepository interface {
 	SaveNewRequestVerification(verification domain.RequestVerification, ctx context.Context) (bool, error)
 	GetAllRequestVerificationForWaiting(ctx context.Context) *[]domain.RequestVerification
@@ -21,6 +23,7 @@ type RequestVerificationRepository interface {
 	ApproveRequestVerification(verificationId string, ctx context.Context) (bool, error)
 	RejectRequestVerification(verificationId string, ctx context.Context) (bool, error)
 	ExistsRequestForProfile(profileId string, ctx context.Context) (bool,error)
+	GetByProfileId(profileId string, ctx context.Context) (domain.RequestVerification, error)
 }
 
 
@@ -36,7 +39,6 @@ func (r *requestVerificationRepository) ExistsRequestForProfile(profileId string
 	}
 	return true, nil
 }
-
 
 func (r *requestVerificationRepository) SaveNewRequestVerification(verification domain.RequestVerification, ctx context.Context) (bool, error) {
 	_, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -89,11 +91,52 @@ func (r *requestVerificationRepository) GetAllRequestVerification(ctx context.Co
 }
 
 func (r *requestVerificationRepository) ApproveRequestVerification(verificationId string, ctx context.Context) (bool, error) {
-	panic("implement me")
+	_, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	verificationToApprove := bson.M{"_id" : verificationId}
+	updateVerification := bson.M{"$set" : bson.M {
+		"state" : enum.VerificationState(1),
+	}}
+
+	_, err := r.collection.UpdateOne(ctx, verificationToApprove, updateVerification)
+	if err != nil {
+		return  false, err
+	}
+
+	return true, nil
+
 }
 
+func (r *requestVerificationRepository) GetByProfileId(profileId string, ctx context.Context) (domain.RequestVerification, error) {
+	_, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	var req domain.RequestVerification
+	err := r.collection.FindOne(ctx, bson.M{"profile_id" : profileId}).Decode(&req)
+
+	if err != nil {
+		return req, err
+	}
+	return req, err
+}
+
+
 func (r *requestVerificationRepository) RejectRequestVerification(verificationId string, ctx context.Context) (bool, error) {
-	panic("implement me")
+	_, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	verificationToApprove := bson.M{"_id" : verificationId}
+	updateVerification := bson.M{"$set" : bson.M {
+		"state" : enum.VerificationState(2),
+	}}
+
+	_, err := r.collection.UpdateOne(ctx, verificationToApprove, updateVerification)
+	if err != nil {
+		return  false, err
+	}
+
+	return true, nil
 }
 
 

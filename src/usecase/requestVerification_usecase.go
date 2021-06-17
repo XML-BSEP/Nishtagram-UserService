@@ -16,6 +16,7 @@ import (
 
 type requestVerificationUseCase struct {
 	RequestVerificationRepository repository.RequestVerificationRepository
+	ProfileInfoRepository repository.ProfileInfoRepository
 }
 
 
@@ -23,11 +24,12 @@ type RequestVerificationUseCase interface {
 	SaveNewRequestVerification(verification dto.RequestVerificationDTO, ctx context.Context) (string, error)
 	GetAllRequestVerificationForWaiting(ctx context.Context) *[]dto.RequestVerificationDTO
 	GetAllRequestVerification(ctx context.Context) *[]dto.RequestVerificationDTO
-	ApproveRequestVerification(verificationId string, ctx context.Context) (bool, error)
+	ApproveRequestVerification(verificationId string, profileId string, ctx context.Context) (bool, error)
 	RejectRequestVerification(verificationId string, ctx context.Context) (bool, error)
 	EncodeBase64(media string, verificationId string, ctx context.Context) (string, error)
 	DecodeBase64(media string, verificationId string, ctx context.Context) (string, error)
 	ExistsRequestForProfile(profileId string, ctx context.Context) (bool,error)
+
 }
 
 func (r *requestVerificationUseCase) ExistsRequestForProfile(profileId string, ctx context.Context) (bool, error) {
@@ -105,12 +107,31 @@ func (r *requestVerificationUseCase) GetAllRequestVerification(ctx context.Conte
 
 }
 
-func (r *requestVerificationUseCase) ApproveRequestVerification(verificationId string, ctx context.Context) (bool, error) {
-	panic("implement me")
+func (r *requestVerificationUseCase) ApproveRequestVerification(verificationId string, profileId string, ctx context.Context) (bool, error) {
+
+	approved, err := r.RequestVerificationRepository.ApproveRequestVerification(verificationId, ctx)
+
+	if approved {
+		req, err := r.RequestVerificationRepository.GetByProfileId(profileId, ctx)
+		if err != nil {
+			return false, err
+		}
+
+		error := r.ProfileInfoRepository.ChangeProfileCategory(profileId, req.Category, ctx)
+
+		if error != nil {
+			return false, err
+		}
+	}
+
+
+	return approved, err
 }
 
-func (r *requestVerificationUseCase) RejectRequestVerification(verificationId string, ctx context.Context) (bool, error) {
-	panic("implement me")
+func (r *requestVerificationUseCase) RejectRequestVerification(verificationId string,ctx context.Context) (bool, error) {
+	rejected, err := r.RequestVerificationRepository.RejectRequestVerification(verificationId, ctx)
+
+	return rejected, err
 }
 
 
@@ -199,6 +220,6 @@ func (r *requestVerificationUseCase) DecodeBase64(media string, verificationId s
 }
 
 
-func NewRequestVerificationUseCase(repo repository.RequestVerificationRepository) RequestVerificationUseCase {
-	return &requestVerificationUseCase{RequestVerificationRepository: repo}
+func NewRequestVerificationUseCase(repo repository.RequestVerificationRepository, infoRepository repository.ProfileInfoRepository) RequestVerificationUseCase {
+	return &requestVerificationUseCase{RequestVerificationRepository: repo, ProfileInfoRepository: infoRepository}
 }

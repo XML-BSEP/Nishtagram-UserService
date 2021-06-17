@@ -29,6 +29,8 @@ func NewRouter(handler interactor.AppHandler, logger *logger.Logger) *gin.Engine
 	router.GET("/getAllRequestVerificationsForWaiting", handler.GetAllRequestVerificationForWaiting)
 	router.GET("/getAllRequestVerifications", handler.GetAllRequestVerification)
 	router.POST("/saveNewRequestVerification", handler.SaveNewVerificationRequest)
+	router.POST("/approveRequestVerification", handler.ApproveRequestVerification)
+	router.POST("/rejectRequestVerification", handler.RejectRequestVerification)
 
 
 

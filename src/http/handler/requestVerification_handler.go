@@ -13,10 +13,13 @@ type requestVerificationHandler struct {
 }
 
 
+
 type RequestVerificationHandler interface {
 	GetAllRequestVerificationForWaiting(ctx *gin.Context)
 	GetAllRequestVerification(ctx *gin.Context)
 	SaveNewVerificationRequest(ctx *gin.Context)
+	ApproveRequestVerification(ctx *gin.Context)
+	RejectRequestVerification(ctx *gin.Context)
 
 }
 
@@ -59,6 +62,47 @@ func (r *requestVerificationHandler) SaveNewVerificationRequest(ctx *gin.Context
 	ctx.JSON(http.StatusOK, gin.H{"message" : message})
 }
 
+func (r *requestVerificationHandler) ApproveRequestVerification(ctx *gin.Context) {
+	var requestToApprove dto.RequestVerificationToChangeStateDTO
+
+	err := json.NewDecoder(ctx.Request.Body).Decode(&requestToApprove)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, "Decoding error")
+		ctx.Abort()
+		return
+	}
+
+	_, err = r.RequestVerificationUseCase.ApproveRequestVerification(requestToApprove.ID, requestToApprove.ProfileId, ctx)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, "Failed to approve")
+		ctx.Abort()
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message" : "Request is approved"})
+
+}
+
+func (r *requestVerificationHandler) RejectRequestVerification(ctx *gin.Context) {
+	var requestToApprove dto.RequestVerificationToChangeStateDTO
+
+	err := json.NewDecoder(ctx.Request.Body).Decode(&requestToApprove)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, "Decoding error")
+		ctx.Abort()
+		return
+	}
+
+	_, err = r.RequestVerificationUseCase.RejectRequestVerification(requestToApprove.ID, ctx)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, "Failed to approve")
+		ctx.Abort()
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message" : "Request is rejected"})
+
+}
 
 func NewRequestVerificationHandler(useCase usecase.RequestVerificationUseCase) RequestVerificationHandler {
 	return &requestVerificationHandler{RequestVerificationUseCase: useCase}

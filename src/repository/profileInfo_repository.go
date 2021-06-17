@@ -18,6 +18,7 @@ type profileInfoRepository struct {
 	logger *logger.Logger
 }
 
+
 type ProfileInfoRepository interface {
 	GetByUsername(username string, ctx context.Context) (domain.ProfileInfo, error)
 	GetAllProfiles(ctx context.Context) ([]domain.ProfileInfo, error)
@@ -32,6 +33,7 @@ type ProfileInfoRepository interface {
 	EditUser(user domain.ProfileInfo, ctx context.Context) error
 	SearchUser(search string, ctx context.Context) ([]*domain.ProfileInfo, error)
 	IsPrivateById(id string, ctx context.Context) (bool, error)
+	ChangeProfileCategory(profileId string, category enum.Category, ctx context.Context) error
 
 }
 
@@ -341,6 +343,25 @@ func NewProfileInfoRepository(db *mongo.Client, logger *logger.Logger) ProfileIn
 		collection: db.Database("user_db").Collection("profiles"),
 		logger: logger,
 	}
+}
+
+
+func (p *profileInfoRepository) ChangeProfileCategory(profileId string, category enum.Category, ctx context.Context) error {
+	_, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	userToUpdate := bson.M{"_id" : profileId}
+	updatedUser := bson.M{"$set": bson.M{
+		"category": category,
+	}}
+
+	_, err := p.collection.UpdateOne(ctx, userToUpdate, updatedUser)
+	if err != nil {
+		return  err
+	}
+
+	return nil
+
 }
 
 

@@ -41,6 +41,7 @@ func RequestVerificationToDTO(verification domain.RequestVerification) dto.Reque
 				Category: verification.Category.String(),
 				Image: verification.Image,
 				ProfileId: verification.ProfileId,
+				State: verification.State.String(),
 	}
 
 }

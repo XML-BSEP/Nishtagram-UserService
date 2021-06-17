@@ -1,11 +1,11 @@
 {
-  "docker" : false,
-  "mongodb_uri_docker" : "mongodb://mongouser:27018",
+  "docker" : true,
+  "mongodb_uri_docker" : "mongodb://mongouser:27017",
   "mongodb_uri_localhost" : "mongodb://localhost:27018",
   "server" : {
     "address_docker" : "mongouser",
     "address_localhost" : "localhost",
-    "port" : 27018
+    "port" : 27017
   },
   "database" : "user_db",
   "production_server" : {

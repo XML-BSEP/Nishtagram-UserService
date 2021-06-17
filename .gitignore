@@ -27,3 +27,5 @@
 /Godeps/
 
 mongodata
+
+logfiles/*

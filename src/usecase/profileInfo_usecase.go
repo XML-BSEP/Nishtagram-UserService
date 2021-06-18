@@ -267,6 +267,7 @@ func (p *profileInfoUseCase) EditUser(newUser dto.NewUserDTO, ctx context.Contex
 		p.logger.Logger.Errorf("error while editting user, error %v\n", err)
 		return errRepo
 	}
+	
 	return nil
 
 

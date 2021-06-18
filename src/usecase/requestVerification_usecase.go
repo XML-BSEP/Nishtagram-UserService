@@ -113,7 +113,7 @@ func (r *requestVerificationUseCase) ApproveRequestVerification(verificationId s
 
 	if approved {
 		req, err := r.RequestVerificationRepository.GetByProfileId(profileId, ctx)
-		if err != nil {
+			if err != nil {
 			return false, err
 		}
 

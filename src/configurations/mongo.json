@@ -1,6 +1,6 @@
 {
   "docker" : false,
-  "mongodb_uri_docker" : "mongodb://mongouser:27018",
+  "mongodb_uri_docker" : "mongodb://mongouser:27017",
   "mongodb_uri_localhost" : "mongodb://localhost:27018",
   "server" : {
     "address_docker" : "mongouser",

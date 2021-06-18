@@ -11,3 +11,9 @@ p, USER, /getProfileInfo, *
 p, USER, /searchUser, *
 p, ANONYMOUS, /searchUser, *
 p, USER, /getProfileInfo, *
+p, USER, /saveNewRequestVerification, *
+p, ADMIN, /getAllRequestVerificationsForWaiting, *
+p, ADMIN, /getAllRequestVerifications, *
+p, ADMIN, /approveRequestVerification, *
+p, ADMIN, /rejectRequestVerification, *
+

@@ -186,7 +186,7 @@ func seedProfileInfo(tags *mongo.Collection, ctx *context.Context) {
 			{"email", "user2@gmail.com"},
 			{"biography", "Ja sam veoma kul kul kul idegasnamax osoba"},
 			{"web_page", "sofascore.com"},
-			{"category", enum.Category(3)},
+			{"category", enum.Category(6)},
 			{"profile_image", "424935b1-766c-4f99-b306-9263731518bc/1babdbb1-dcd8-4325-b979-344900dff180.jpeg"},
 			{"person", person2},
 			{"profile", profile2},
@@ -195,7 +195,7 @@ func seedProfileInfo(tags *mongo.Collection, ctx *context.Context) {
 			{"email", "user3@gmail.com"},
 			{"biography", "IDEMO NIIIIIIIIIIIIIIIIIIIIIIIIIIS"},
 			{"web_page", ""},
-			{"category", enum.Category(3)},
+			{"category", enum.Category(6)},
 			{"profile_image", "a2c2f993-dc32-4a82-82ed-a5f6866f7d03/pexels-photo-2078265.jpeg"},
 			{"person", person3},
 			{"profile", profile3},
@@ -265,6 +265,9 @@ func seedRequestVerification(tags *mongo.Collection, ctx *context.Context) {
 			{"surname", "Peric"},
 			{"category", enum.Category(0)},
 			{"image", ""},
+			{"state", enum.VerificationState(0)},
+			{"profile_id", "e2b5f92e-c31b-11eb-8529-0242ac130003"},
+
 		},
 	})
 

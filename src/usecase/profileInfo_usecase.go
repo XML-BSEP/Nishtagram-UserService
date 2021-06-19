@@ -95,7 +95,7 @@ func (p *profileInfoUseCase) GetUserById(id string, ctx context.Context) (dto.Us
 	userDTO := dto.NewSimplyUserDTO(profile.Person.Name, profile.Person.Surname, profile.Email, profile.Person.Address,
 		profile.Person.Phone, profile.Person.DateOfBirth.Format("02-Jan-2006"), profile.Person.Gender, profile.WebPage, profile.Biography,
 		profile.Profile.Username, encodedImage, profile.Profile.PrivacyPermission.String())
-
+	userDTO.Category = profile.Category.String()
 
 	return userDTO, nil
 }

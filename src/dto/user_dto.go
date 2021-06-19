@@ -18,6 +18,7 @@ type UserDTO struct {
 	Username string `bson:"username" json:"username"`
 	Image    string `bson:"image" json:"image"`
 	Private bool `bson:"private" json:"private"`
+	Category string `bson:"category" json:"category"`
 }
 
 func NewSimplyUserDTO(name string, surname string, email string, address string, phone string, birthday string,

@@ -3,13 +3,33 @@ package main
 import (
 	"context"
 	logger "github.com/jelena-vlajkov/logger/logger"
+	"google.golang.org/grpc"
+	"log"
+	"net"
 	"os"
+	"strconv"
 	router2 "user-service/http/router"
+	"user-service/infrastructure/grpc/service/user_service"
 	"user-service/infrastructure/mongo"
 	"user-service/infrastructure/seeder"
 	interactor2 "user-service/interactor"
-
 )
+
+func getNetListener(port uint) net.Listener {
+	var domain string
+	if os.Getenv("DOCKER_ENV") == "" {
+		domain = "127.0.0.1"
+	} else {
+		domain = "userms"
+	}
+	domain = domain + ":" + strconv.Itoa(int(port))
+	lis, err := net.Listen("tcp", domain)
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+
+	return lis
+}
 
 func main() {
 
@@ -24,6 +44,14 @@ func main() {
 
 
 	router := router2.NewRouter(appHandler, logger)
+
+	lis := getNetListener(8075)
+	userServiceImpl := interactor.NewUserServiceImpl()
+	grpcServer := grpc.NewServer()
+	user_service.RegisterUserDetailsServer(grpcServer, userServiceImpl)
+	go func() {
+		log.Fatalln(grpcServer.Serve(lis))
+	}()
 
 	if os.Getenv("DOCKER_ENV") == "" {
 

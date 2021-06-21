@@ -3,7 +3,7 @@ package notification_client
 import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	pb "user-service/grpc/service/notification_service"
+	pb "user-service/infrastructure/grpc/service/notification_service"
 )
 
 func NewNotificationClient(address string) (pb.NotificationClient, error) {

@@ -30,7 +30,6 @@ COPY --from=builder /src/certificate ./src/certificate
 COPY --from=builder /src/assets ./src/assets
 COPY --from=builder /src/domain ./src/domain
 COPY --from=builder /src/dto ./src/dto
-COPY --from=builder /src/grpc ./src/grpc
 COPY --from=builder /src/http ./src/http
 COPY --from=builder /src/infrastructure ./src/infrastructure
 COPY --from=builder /src/interactor ./src/interactor

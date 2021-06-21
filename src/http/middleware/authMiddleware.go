@@ -55,7 +55,7 @@ func enforce(role string, obj string, act string, logger *logger.Logger) (bool, 
 
 	if !strings.HasSuffix(m, "src")  {
 		splits := strings.Split(m, "src")
-		wd := splits[0] + "\\src"
+		wd := splits[0] + "/src"
 		fmt.Println(wd)
 		os.Chdir(wd)
 	}

@@ -4,6 +4,7 @@ import (
 	logger "github.com/jelena-vlajkov/logger/logger"
 	"go.mongodb.org/mongo-driver/mongo"
 	"user-service/http/handler"
+	"user-service/infrastructure/grpc/service/user_service/implementation"
 	"user-service/repository"
 	"user-service/usecase"
 )
@@ -12,8 +13,6 @@ type interactor struct {
 	db *mongo.Client
 	logger *logger.Logger
 }
-
-
 
 type Interactor interface {
 
@@ -27,6 +26,8 @@ type Interactor interface {
 	NewRequestVerificationHandler() handler.RequestVerificationHandler
 
 	NewAppHandler() AppHandler
+
+	NewUserServiceImpl() *implementation.UserServiceImpl
 }
 
 
@@ -55,6 +56,10 @@ func (i *interactor) NewProfileInfoHandler() handler.ProfileInfoHandler {
 }
 func (i *interactor) NewRequestVerificationHandler() handler.RequestVerificationHandler {
 	return handler.NewRequestVerificationHandler(i.NewRequestVerificationUseCase())
+}
+
+func (i *interactor) NewUserServiceImpl() *implementation.UserServiceImpl {
+	return implementation.NewUserServiceImpl(i.NewProfileInfoUseCase())
 }
 
 type appHandler struct {

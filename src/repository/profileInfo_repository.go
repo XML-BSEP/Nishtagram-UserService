@@ -34,6 +34,7 @@ type ProfileInfoRepository interface {
 	SearchUser(search string, ctx context.Context) ([]*domain.ProfileInfo, error)
 	IsPrivateById(id string, ctx context.Context) (bool, error)
 	ChangeProfileCategory(profileId string, category enum.Category, ctx context.Context) error
+	ChangePrivacyAndTagging(permission enum.PrivacyPermission, allowToTag bool, profileId string, ctx context.Context) error
 
 }
 
@@ -333,6 +334,25 @@ func (p *profileInfoRepository) SearchUser(search string, ctx context.Context) (
 
 
 	return foundUsers, nil
+
+}
+
+func (p *profileInfoRepository) ChangePrivacyAndTagging(permission enum.PrivacyPermission, allowToTag bool, profileId string, ctx context.Context) error {
+	_, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	userToUpdate := bson.M{"_id" : profileId}
+	updatedUser := bson.M{"$set": bson.M{
+		"profile.privacy_permission": permission,
+		"profile.allow_tagging" : allowToTag,
+	}}
+
+	_, err := p.collection.UpdateOne(ctx, userToUpdate, updatedUser)
+	if err != nil {
+		return  err
+	}
+
+	return nil
 
 }
 

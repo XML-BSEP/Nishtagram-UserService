@@ -29,6 +29,8 @@ func NewRouter(handler interactor.AppHandler, logger *logger.Logger) *gin.Engine
 	router.POST("/saveNewRequestVerification", handler.SaveNewVerificationRequest)
 	router.POST("/approveRequestVerification", handler.ApproveRequestVerification)
 	router.POST("/rejectRequestVerification", handler.RejectRequestVerification)
+	router.POST("/changePrivacyAndTagging", handler.ChangePrivacyAndTaggin)
+	router.GET("/getPrivacyAndTagging", handler.GetPrivacyAndTagging)
 
 
 

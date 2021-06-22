@@ -16,4 +16,6 @@ p, ADMIN, /getAllRequestVerificationsForWaiting, *
 p, ADMIN, /getAllRequestVerifications, *
 p, ADMIN, /approveRequestVerification, *
 p, ADMIN, /rejectRequestVerification, *
+p, USER, /changePrivacyAndTagging, *
+p, USER, /getPrivacyAndTagging, *
 

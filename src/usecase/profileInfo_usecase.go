@@ -11,6 +11,7 @@ import (
 	"os"
 	"strings"
 	"user-service/domain"
+	"user-service/domain/enum"
 	"user-service/dto"
 	"user-service/repository"
 )
@@ -39,6 +40,8 @@ type ProfileInfoUseCase interface {
 	SearchUser(search string, ctx context.Context) ([]*domain.ProfileInfo, error)
 	IsPrivateById(id string, ctx context.Context) (bool, error)
 	SearchPublicUsers(search string, ctx context.Context) ([]*domain.ProfileInfo, error)
+	ChangePrivacyAndTagging(taggingDTO dto.PrivacyTaggingDTO, ctx context.Context) error
+	GetPrivacyAndTagging(profileId string, ctx context.Context) dto.PrivacyTaggingDTO
 
 }
 
@@ -316,6 +319,39 @@ func (p *profileInfoUseCase) SearchPublicUsers(search string, ctx context.Contex
 
 	return publics, nil
 }
+
+func (p *profileInfoUseCase) ChangePrivacyAndTagging(taggingDTO dto.PrivacyTaggingDTO, ctx context.Context) error {
+
+	var privacy enum.PrivacyPermission
+	if taggingDTO.PrivacyPermission == "Private"{
+		privacy = enum.PrivacyPermission(0)
+	}else {
+		privacy = enum.PrivacyPermission(1)
+	}
+
+	err := p.ProfileInfoRepository.ChangePrivacyAndTagging(privacy, taggingDTO.AllowTagging, taggingDTO.ProfileId, ctx)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (p *profileInfoUseCase) GetPrivacyAndTagging(profileId string, ctx context.Context) dto.PrivacyTaggingDTO {
+	profile,err := p.ProfileInfoRepository.GetById(profileId, ctx)
+	if err != nil {
+		return dto.PrivacyTaggingDTO{}
+	}
+
+	var privacyTaggingDTO dto.PrivacyTaggingDTO
+	privacyTaggingDTO.AllowTagging = profile.Profile.AllowTagging
+	privacyTaggingDTO.PrivacyPermission = profile.Profile.PrivacyPermission.String()
+	privacyTaggingDTO.ProfileId = profileId
+
+	return privacyTaggingDTO
+
+}
+
 
 func NewProfileInfoUseCase(repo repository.ProfileInfoRepository, logger *logger.Logger) ProfileInfoUseCase {
 	return &profileInfoUseCase{ ProfileInfoRepository: repo, logger: logger}

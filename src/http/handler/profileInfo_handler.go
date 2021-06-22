@@ -21,6 +21,8 @@ type profileInfoHandlder struct {
 	logger *logger.Logger
 }
 
+
+
 func (p *profileInfoHandlder) SearchPublicUser(ctx *gin.Context) {
 	p.logger.Logger.Println("Handling SEARCH PUBLIC USERS")
 	search := ctx.Request.URL.Query().Get("search")
@@ -444,6 +446,37 @@ func (p *profileInfoHandlder) EditUser(ctx *gin.Context) {
 
 }
 
+func (p *profileInfoHandlder) ChangePrivacyAndTaggin(ctx *gin.Context) {
+	var changeDTO dto.PrivacyTaggingDTO
+
+	err := json.NewDecoder(ctx.Request.Body).Decode(&changeDTO)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, "Decoding error")
+		ctx.Abort()
+		return
+	}
+
+	error := p.ProfileInfoUseCase.ChangePrivacyAndTagging(changeDTO, ctx)
+	if error != nil {
+		ctx.JSON(http.StatusBadRequest, "Failed to change privacy")
+		ctx.Abort()
+		return
+	}
+
+	ctx.JSON(200, "User updated")
+
+
+}
+
+func (p *profileInfoHandlder) GetPrivacyAndTagging(ctx *gin.Context) {
+	id := ctx.Request.URL.Query().Get("userId")
+
+	dto := p.ProfileInfoUseCase.GetPrivacyAndTagging(id, ctx)
+
+	ctx.JSON(200, dto)
+
+}
+
 type ProfileInfoHandler interface {
 	GetProfileInfoByUsername(ctx *gin.Context)
 	GetById(ctx *gin.Context)
@@ -458,6 +491,8 @@ type ProfileInfoHandler interface {
 	SearchUser(ctx *gin.Context)
 	IsPrivatePostMethod(ctx *gin.Context)
 	SearchPublicUser(ctx *gin.Context)
+	ChangePrivacyAndTaggin(ctx *gin.Context)
+	GetPrivacyAndTagging(ctx *gin.Context)
 }
 func NewProfileInfoHandler(usecase usecase.ProfileInfoUseCase, logger *logger.Logger) ProfileInfoHandler{
 	return &profileInfoHandlder{ProfileInfoUseCase: usecase, logger: logger}

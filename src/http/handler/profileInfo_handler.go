@@ -477,6 +477,27 @@ func (p *profileInfoHandlder) GetPrivacyAndTagging(ctx *gin.Context) {
 
 }
 
+func (p *profileInfoHandlder) BanProfile(ctx *gin.Context) {
+
+	var banProfile dto.BanProfileDTO
+	err := json.NewDecoder(ctx.Request.Body).Decode(&banProfile)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, "Decoding error")
+		ctx.Abort()
+		return
+	}
+
+	result := p.ProfileInfoUseCase.BanUser(banProfile.ProfileId, ctx)
+	if result == false {
+		ctx.JSON(http.StatusBadRequest, "Failed to ban")
+		ctx.Abort()
+		return
+	}
+
+	ctx.JSON(200, "Profile banned")
+
+}
+
 type ProfileInfoHandler interface {
 	GetProfileInfoByUsername(ctx *gin.Context)
 	GetById(ctx *gin.Context)
@@ -493,6 +514,7 @@ type ProfileInfoHandler interface {
 	SearchPublicUser(ctx *gin.Context)
 	ChangePrivacyAndTaggin(ctx *gin.Context)
 	GetPrivacyAndTagging(ctx *gin.Context)
+	BanProfile(ctx *gin.Context)
 }
 func NewProfileInfoHandler(usecase usecase.ProfileInfoUseCase, logger *logger.Logger) ProfileInfoHandler{
 	return &profileInfoHandlder{ProfileInfoUseCase: usecase, logger: logger}

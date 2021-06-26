@@ -35,6 +35,7 @@ type ProfileInfoRepository interface {
 	IsPrivateById(id string, ctx context.Context) (bool, error)
 	ChangeProfileCategory(profileId string, category enum.Category, ctx context.Context) error
 	ChangePrivacyAndTagging(permission enum.PrivacyPermission, allowToTag bool, profileId string, ctx context.Context) error
+	BanProfile(profileId string, ctx context.Context) bool
 
 }
 
@@ -356,14 +357,23 @@ func (p *profileInfoRepository) ChangePrivacyAndTagging(permission enum.PrivacyP
 
 }
 
+func (p *profileInfoRepository) BanProfile(profileId string, ctx context.Context) bool {
+	_, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 
-func NewProfileInfoRepository(db *mongo.Client, logger *logger.Logger) ProfileInfoRepository {
-	return &profileInfoRepository {
-		db : db,
-		collection: db.Database("user_db").Collection("profiles"),
-		logger: logger,
+	userToUpdate := bson.M{"_id" : profileId}
+	updatedUser := bson.M{"$set": bson.M{
+		"profile.privacy_permission": enum.PrivacyPermission(2),
+	}}
+
+	_, err := p.collection.UpdateOne(ctx, userToUpdate, updatedUser)
+	if err != nil {
+		return false
 	}
+
+	return true
 }
+
 
 
 func (p *profileInfoRepository) ChangeProfileCategory(profileId string, category enum.Category, ctx context.Context) error {
@@ -382,6 +392,16 @@ func (p *profileInfoRepository) ChangeProfileCategory(profileId string, category
 
 	return nil
 
+}
+
+
+
+func NewProfileInfoRepository(db *mongo.Client, logger *logger.Logger) ProfileInfoRepository {
+	return &profileInfoRepository {
+		db : db,
+		collection: db.Database("user_db").Collection("profiles"),
+		logger: logger,
+	}
 }
 
 

@@ -13,6 +13,7 @@ import (
 	"user-service/domain"
 	"user-service/domain/enum"
 	"user-service/dto"
+	"user-service/gateway"
 	"user-service/repository"
 )
 
@@ -404,7 +405,11 @@ func (p *profileInfoUseCase) GetPrivacyAndTagging(profileId string, ctx context.
 }
 
 func (p *profileInfoUseCase) BanUser(profileId string, ctx context.Context) bool {
-	return p.ProfileInfoRepository.BanProfile(profileId, ctx)
+	response := p.ProfileInfoRepository.BanProfile(profileId, ctx)
+
+	gateway.BanFollow(ctx, profileId)
+
+	return response
 }
 
 func NewProfileInfoUseCase(repo repository.ProfileInfoRepository, logger *logger.Logger) ProfileInfoUseCase {

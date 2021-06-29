@@ -13,6 +13,7 @@ import (
 	"user-service/domain"
 	"user-service/domain/enum"
 	"user-service/dto"
+	"user-service/gateway"
 	"user-service/repository"
 )
 
@@ -20,6 +21,7 @@ type profileInfoUseCase struct {
 	ProfileInfoRepository repository.ProfileInfoRepository
 	logger *logger.Logger
 }
+
 
 
 type ProfileInfoUseCase interface {
@@ -42,6 +44,7 @@ type ProfileInfoUseCase interface {
 	SearchPublicUsers(search string, ctx context.Context) ([]*domain.ProfileInfo, error)
 	ChangePrivacyAndTagging(taggingDTO dto.PrivacyTaggingDTO, ctx context.Context) error
 	GetPrivacyAndTagging(profileId string, ctx context.Context) dto.PrivacyTaggingDTO
+	BanUser(profileId string, ctx context.Context) bool
 
 }
 
@@ -69,26 +72,64 @@ func (p *profileInfoUseCase) GetByUsername(username string, ctx context.Context)
 }
 
 func (p *profileInfoUseCase) GetAllProfiles(ctx context.Context) ([]domain.ProfileInfo, error) {
-	 return p.ProfileInfoRepository.GetAllProfiles(ctx)
+	 profiles, err := p.ProfileInfoRepository.GetAllProfiles(ctx)
+
+	 if err != nil {
+	 	return nil, err
+	 }
+
+	 var profileInfos []domain.ProfileInfo
+	 for _, p := range profiles {
+	 	if p.Profile.PrivacyPermission != 2 {
+	 		profileInfos = append(profileInfos, p)
+		}
+	 }
+
+
+	 return profileInfos, nil
 }
 
 func (p *profileInfoUseCase) GetAllUserProfiles(ctx context.Context) ([]domain.ProfileInfo, error) {
-	return p.ProfileInfoRepository.GetAllUserProfiles(ctx)
+	profiles, err := p.ProfileInfoRepository.GetAllUserProfiles(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var profileInfos []domain.ProfileInfo
+	for _, p := range profiles {
+		if p.Profile.PrivacyPermission != 2 {
+			profileInfos = append(profileInfos, p)
+		}
+	}
+
+
+	return profileInfos, nil
 }
 
 func (p *profileInfoUseCase) GetById(id string, ctx context.Context) (*domain.ProfileInfo, error) {
 	p.logger.Logger.Infof("getting by id %v\n", id)
 	user, _ :=  p.ProfileInfoRepository.GetById(id, ctx)
+
+	if user.Profile.PrivacyPermission == 2 {
+		return nil, nil
+	}
 	if user.ProfileImage != "" {
 		encodedImage, _ := p.DecodeBase64(user.ProfileImage, user.ID, ctx)
 		user.ProfileImage = encodedImage
 	}
+
+
 	return user, nil
 }
 
 func (p *profileInfoUseCase) GetUserById(id string, ctx context.Context) (dto.UserDTO, error) {
 	p.logger.Logger.Infof("getting user by id %v\n", id)
 	profile, _ := p.ProfileInfoRepository.GetUserById(id, ctx)
+
+	if profile.Profile.PrivacyPermission == 2 {
+		return dto.UserDTO{}, nil
+	}
 
 	var encodedImage string
 	if profile.ProfileImage != "" {
@@ -106,6 +147,10 @@ func (p *profileInfoUseCase) GetUserById(id string, ctx context.Context) (dto.Us
 func (p *profileInfoUseCase) GetUserProfileById(id string, ctx context.Context) (dto.UserProfileDTO, error) {
 	p.logger.Logger.Infof("gettin user profile %v\n", id)
 	profile, _ := p.ProfileInfoRepository.GetUserById(id, ctx)
+
+	if profile.Profile.PrivacyPermission == 2 {
+		return dto.UserProfileDTO{}, nil
+	}
 
 	var encodedImage string
 	if profile.ProfileImage != "" {
@@ -191,8 +236,15 @@ func (p *profileInfoUseCase) GetAllPublicProfiles(ctx context.Context) ([]dto.Us
 		p.logger.Logger.Errorf("error while getting public profiles, error %v\n", err)
 	}
 
+	var usersNotBanned[] domain.ProfileInfo
+	for _, u := range users {
+		if u.Profile.PrivacyPermission != 2 {
+			usersNotBanned = append(usersNotBanned, u)
+		}
+	}
+
 	var usersDTO []dto.UserDTO
-	for _, user := range users {
+	for _, user := range usersNotBanned {
 		if user.ProfileImage != ""{
 			var img string
 			img, _ = p.DecodeBase64(user.ProfileImage, user.ID, ctx)
@@ -352,6 +404,13 @@ func (p *profileInfoUseCase) GetPrivacyAndTagging(profileId string, ctx context.
 
 }
 
+func (p *profileInfoUseCase) BanUser(profileId string, ctx context.Context) bool {
+	response := p.ProfileInfoRepository.BanProfile(profileId, ctx)
+
+	gateway.BanFollow(ctx, profileId)
+
+	return response
+}
 
 func NewProfileInfoUseCase(repo repository.ProfileInfoRepository, logger *logger.Logger) ProfileInfoUseCase {
 	return &profileInfoUseCase{ ProfileInfoRepository: repo, logger: logger}

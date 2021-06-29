@@ -32,5 +32,6 @@ require (
 	google.golang.org/protobuf v1.26.0 // indirect
 	gopkg.in/go-playground/validator.v9 v9.31.0
 	gopkg.in/yaml.v2 v2.4.0 // indirect
+	github.com/go-resty/resty/v2 v2.6.0
 
 )

@@ -18,4 +18,5 @@ p, ADMIN, /approveRequestVerification, *
 p, ADMIN, /rejectRequestVerification, *
 p, USER, /changePrivacyAndTagging, *
 p, USER, /getPrivacyAndTagging, *
+p, ADMIN, /banProfile, *
 

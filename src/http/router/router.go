@@ -31,6 +31,7 @@ func NewRouter(handler interactor.AppHandler, logger *logger.Logger) *gin.Engine
 	router.POST("/rejectRequestVerification", handler.RejectRequestVerification)
 	router.POST("/changePrivacyAndTagging", handler.ChangePrivacyAndTaggin)
 	router.GET("/getPrivacyAndTagging", handler.GetPrivacyAndTagging)
+	router.POST("/banProfile", handler.BanProfile)
 
 
 

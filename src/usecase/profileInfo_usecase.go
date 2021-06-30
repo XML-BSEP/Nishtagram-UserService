@@ -405,9 +405,11 @@ func (p *profileInfoUseCase) GetPrivacyAndTagging(profileId string, ctx context.
 }
 
 func (p *profileInfoUseCase) BanUser(profileId string, ctx context.Context) bool {
+	profile, _ := p.GetUserProfileById(profileId, ctx)
 	response := p.ProfileInfoRepository.BanProfile(profileId, ctx)
 
 	gateway.BanFollow(ctx, profileId)
+	gateway.DeleteProfileInfo(ctx, profile.User.Username)
 
 	return response
 }

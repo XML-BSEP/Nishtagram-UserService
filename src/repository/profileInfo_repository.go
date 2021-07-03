@@ -19,6 +19,7 @@ type profileInfoRepository struct {
 }
 
 
+
 type ProfileInfoRepository interface {
 	GetByUsername(username string, ctx context.Context) (domain.ProfileInfo, error)
 	GetAllProfiles(ctx context.Context) ([]domain.ProfileInfo, error)
@@ -36,6 +37,7 @@ type ProfileInfoRepository interface {
 	ChangeProfileCategory(profileId string, category enum.Category, ctx context.Context) error
 	ChangePrivacyAndTagging(permission enum.PrivacyPermission, allowToTag bool, profileId string, ctx context.Context) error
 	BanProfile(profileId string, ctx context.Context) bool
+	IsInfluencer(profileId string, ctx context.Context) (bool, error)
 
 }
 
@@ -392,6 +394,23 @@ func (p *profileInfoRepository) ChangeProfileCategory(profileId string, category
 
 	return nil
 
+}
+
+func (p *profileInfoRepository) IsInfluencer(profileId string, ctx context.Context) (bool, error) {
+	_, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	var profile domain.ProfileInfo
+	err := p.collection.FindOne(ctx, bson.M{"_id" : profileId}).Decode(&profile)
+	if err != nil {
+		return false, err
+	}
+
+	if profile.Category.String() == "Influencer" {
+		return true, nil
+	}
+
+	return false, nil
 }
 
 

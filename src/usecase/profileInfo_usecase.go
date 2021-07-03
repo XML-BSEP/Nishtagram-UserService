@@ -45,6 +45,7 @@ type ProfileInfoUseCase interface {
 	ChangePrivacyAndTagging(taggingDTO dto.PrivacyTaggingDTO, ctx context.Context) error
 	GetPrivacyAndTagging(profileId string, ctx context.Context) dto.PrivacyTaggingDTO
 	BanUser(profileId string, ctx context.Context) bool
+	IsInfluencerAndPrivate(profileId string, ctx context.Context) (*dto.InfluencerPrivateDTO, error)
 
 }
 
@@ -412,6 +413,27 @@ func (p *profileInfoUseCase) BanUser(profileId string, ctx context.Context) bool
 	gateway.DeleteProfileInfo(ctx, profile.User.Username)
 
 	return response
+}
+
+func (p *profileInfoUseCase) IsInfluencerAndPrivate(profileId string, ctx context.Context) (*dto.InfluencerPrivateDTO, error) {
+
+	var influencerPrivateDTO dto.InfluencerPrivateDTO
+
+	isInfluencer, err := p.ProfileInfoRepository.IsInfluencer(profileId, ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	isPrivate, err := p.ProfileInfoRepository.IsPrivateById(profileId, ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	influencerPrivateDTO.IsInfluencer = isInfluencer
+	influencerPrivateDTO.IsPrivate = isPrivate
+
+	return &influencerPrivateDTO, err
+
 }
 
 func NewProfileInfoUseCase(repo repository.ProfileInfoRepository, logger *logger.Logger) ProfileInfoUseCase {

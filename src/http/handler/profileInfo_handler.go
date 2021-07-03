@@ -498,6 +498,26 @@ func (p *profileInfoHandlder) BanProfile(ctx *gin.Context) {
 
 }
 
+func (p *profileInfoHandlder) IsInfluencerAndPrivate(ctx *gin.Context) {
+
+	var banProfile dto.BanProfileDTO
+	err := json.NewDecoder(ctx.Request.Body).Decode(&banProfile)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, "Decoding error")
+		ctx.Abort()
+		return
+	}
+
+	result, err := p.ProfileInfoUseCase.IsInfluencerAndPrivate(banProfile.ProfileId, ctx)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, "Checking influencer failed")
+		ctx.Abort()
+		return
+	}
+
+	ctx.JSON(200, result)
+}
+
 type ProfileInfoHandler interface {
 	GetProfileInfoByUsername(ctx *gin.Context)
 	GetById(ctx *gin.Context)
@@ -515,6 +535,7 @@ type ProfileInfoHandler interface {
 	ChangePrivacyAndTaggin(ctx *gin.Context)
 	GetPrivacyAndTagging(ctx *gin.Context)
 	BanProfile(ctx *gin.Context)
+	IsInfluencerAndPrivate(ctx *gin.Context)
 }
 func NewProfileInfoHandler(usecase usecase.ProfileInfoUseCase, logger *logger.Logger) ProfileInfoHandler{
 	return &profileInfoHandlder{ProfileInfoUseCase: usecase, logger: logger}

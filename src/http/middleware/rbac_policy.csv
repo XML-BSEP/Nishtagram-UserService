@@ -30,4 +30,6 @@ p, AGENT, /changePrivacyAndTagging, *
 p, USER, /getPrivacyAndTagging, *
 p, AGENT, /getPrivacyAndTagging, *
 p, ADMIN, /banProfile, *
+p, USER, /IsInfluencerAndPrivate, *
+p, AGENT, /IsInfluencerAndPrivate, *
 

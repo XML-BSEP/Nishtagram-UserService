@@ -177,7 +177,7 @@ func seedProfileInfo(tags *mongo.Collection, ctx *context.Context) {
 			{"email", "user1@gmail.com"},
 			{"biography", "Ja sam kul osoba"},
 			{"web_page", "pera.com"},
-			{"category", enum.Category(6)},
+			{"category", enum.Category(0)},
 			{"profile_image", "e2b5f92e-c31b-11eb-8529-0242ac130003/1b1a4d40-eb31-4acd-a947-ad398f47c692.jpeg"},
 			{"person", person1},
 			{"profile", profile1},

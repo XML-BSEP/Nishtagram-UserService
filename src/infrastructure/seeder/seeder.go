@@ -172,6 +172,21 @@ func seedProfileInfo(tags *mongo.Collection, ctx *context.Context) {
 		AllowNotification: true,
 		Type : enum.ProfileType(0)}
 
+	person8 := domain.Person{
+		Name: "Agent",
+		Surname: "Agentovic",
+		Gender: enum.Gender(0),
+		DateOfBirth: time.Date( 1992, 06, 8, 20, 20, 20, 651387237, time.UTC),
+		Address: "Agentoviicii, Srbija",
+		Phone: "021/281-221"}
+
+	profile8 := domain.Profile{
+		Username : "agent1",
+		PrivacyPermission : enum.PrivacyPermission(1),
+		AllowTagging : true,
+		AllowNotification: true,
+		Type : enum.ProfileType(1)}
+
 	_, err := tags.InsertMany(*ctx, []interface{} {
 		bson.D{{"_id", "e2b5f92e-c31b-11eb-8529-0242ac130003"},
 			{"email", "user1@gmail.com"},
@@ -235,6 +250,15 @@ func seedProfileInfo(tags *mongo.Collection, ctx *context.Context) {
 			{"profile_image", ""},
 			{"person", person7},
 			{"profile", profile7},
+		},
+		bson.D{{"_id", "1d09bb0a-d9fc-11eb-b8bc-0242ac130003"},
+			{"email", "agent1@gmail.com"},
+			{"biography", "Agent 1 bios"},
+			{"web_page", "www.google.com/"},
+			{"category", enum.Category(6)},
+			{"profile_image", ""},
+			{"person", person8},
+			{"profile", profile8},
 		},
 	})
 

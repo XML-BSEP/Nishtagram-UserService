@@ -31,7 +31,6 @@ func (r *requestVerificationHandler) GetAllRequestVerificationForWaiting(ctx *gi
 
 func (r *requestVerificationHandler) GetAllRequestVerification(ctx *gin.Context) {
 	verifications := r.RequestVerificationUseCase.GetAllRequestVerification(ctx)
-
 	ctx.JSON(200, verifications)
 }
 

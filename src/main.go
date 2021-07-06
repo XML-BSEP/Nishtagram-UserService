@@ -11,6 +11,8 @@ import (
 	router2 "user-service/http/router"
 	"user-service/infrastructure/grpc/service/user_service"
 	"user-service/infrastructure/mongo"
+	"user-service/infrastructure/saga"
+	"user-service/infrastructure/saga_redisdb"
 	"user-service/infrastructure/seeder"
 	interactor2 "user-service/interactor"
 )
@@ -38,10 +40,13 @@ func main() {
 	mongoCli, ctx := mongo.NewMongoClient()
 	db := mongo.GetDbName()
 	seeder.SeedData(db, mongoCli, ctx)
+	sagaRedisClient := saga_redisdb.NewSagaRedis(logger)
 
 	interactor := interactor2.NewInteractor(mongoCli, logger)
 	appHandler := interactor.NewAppHandler()
 
+	authSaga := saga.NewAuthSaga(interactor.NewProfileInfoUseCase(), sagaRedisClient)
+	go authSaga.SagaAuth(context.Background())
 
 	router := router2.NewRouter(appHandler, logger)
 

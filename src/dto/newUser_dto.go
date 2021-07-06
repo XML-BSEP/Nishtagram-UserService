@@ -21,6 +21,7 @@ type NewUserDTO struct {
 	Username string `bson:"username" json:"username" validate:"required,username"`
 	Image    string `bson:"image" json:"image"`
 	Private bool `bson:"private" json:"private"`
+	Password string `json:"password"`
 
 }
 

@@ -7,12 +7,15 @@ replace github.com/jelena-vlajkov/logger/logger => ../../Nishtagram-Logger/
 require (
 	github.com/casbin/casbin/v2 v2.31.2
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/gin-contrib/secure v0.0.1
 	github.com/gin-gonic/gin v1.7.2
 	github.com/go-playground/locales v0.13.0
 	github.com/go-playground/universal-translator v0.17.0
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/go-playground/validator/v10 v10.6.1 // indirect
+	github.com/go-redis/redis/v8 v8.11.0 // indirect
+	github.com/go-resty/resty/v2 v2.6.0
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/uuid v1.2.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0 // indirect
@@ -32,6 +35,5 @@ require (
 	google.golang.org/protobuf v1.26.0 // indirect
 	gopkg.in/go-playground/validator.v9 v9.31.0
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	github.com/go-resty/resty/v2 v2.6.0
 
 )

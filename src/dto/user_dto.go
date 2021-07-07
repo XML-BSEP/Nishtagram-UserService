@@ -21,6 +21,10 @@ type UserDTO struct {
 	Category string `bson:"category" json:"category"`
 }
 
+type UserIdsDto struct{
+	Ids []string `json:"ids"`
+}
+
 func NewSimplyUserDTO(name string, surname string, email string, address string, phone string, birthday string,
 	gender enum.Gender, web string, bio string, username string, image string, private string) UserDTO{
 

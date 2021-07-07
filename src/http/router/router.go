@@ -33,7 +33,7 @@ func NewRouter(handler interactor.AppHandler, logger *logger.Logger) *gin.Engine
 	router.GET("/getPrivacyAndTagging", handler.GetPrivacyAndTagging)
 	router.POST("/banProfile", handler.BanProfile)
 	router.POST("/IsInfluencerAndPrivate", handler.IsInfluencerAndPrivate)
-
+	router.POST("/getSearchInfo", handler.GetProfileInfo)
 
 
 	return router

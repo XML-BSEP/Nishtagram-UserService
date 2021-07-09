@@ -21,7 +21,34 @@ type profileInfoHandlder struct {
 	logger *logger.Logger
 }
 
+func (p *profileInfoHandlder) GetProfileInfo(ctx *gin.Context) {
+	decoder := json.NewDecoder(ctx.Request.Body)
 
+	var ids dto.UserIdsDto
+	if err := decoder.Decode(&ids); err != nil {
+		ctx.JSON(500, gin.H{"message" : "Error decoding body"})
+		return
+	}
+
+	var usersDTO []dto.SearchUserDTO
+
+	for _, val := range ids.Ids {
+		user, err := p.ProfileInfoUseCase.GetById(val, ctx)
+		if err != nil {
+			continue
+		}
+		userDto := dto.SearchUserDTO{
+			Username: user.Profile.Username,
+			Image: user.ProfileImage,
+			Name: user.Person.Name,
+			Surname: user.Person.Surname,
+			Id: user.ID,
+		}
+		usersDTO = append(usersDTO, userDto)
+	}
+
+	ctx.JSON(200, usersDTO)
+}
 
 func (p *profileInfoHandlder) SearchPublicUser(ctx *gin.Context) {
 	p.logger.Logger.Println("Handling SEARCH PUBLIC USERS")
@@ -536,6 +563,7 @@ type ProfileInfoHandler interface {
 	GetPrivacyAndTagging(ctx *gin.Context)
 	BanProfile(ctx *gin.Context)
 	IsInfluencerAndPrivate(ctx *gin.Context)
+	GetProfileInfo(ctx *gin.Context)
 }
 func NewProfileInfoHandler(usecase usecase.ProfileInfoUseCase, logger *logger.Logger) ProfileInfoHandler{
 	return &profileInfoHandlder{ProfileInfoUseCase: usecase, logger: logger}

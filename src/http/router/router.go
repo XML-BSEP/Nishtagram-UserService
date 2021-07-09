@@ -4,11 +4,14 @@ import (
 	"github.com/gin-gonic/gin"
 	logger "github.com/jelena-vlajkov/logger/logger"
 	"user-service/http/middleware"
+	"user-service/http/middleware/prometheus_middleware"
 	"user-service/interactor"
 )
 
 func NewRouter(handler interactor.AppHandler, logger *logger.Logger) *gin.Engine {
 	router := gin.Default()
+	requestCounter := prometheus_middleware.GetHttpRequestsCounter()
+	router.Use(prometheus_middleware.PrometheusMiddleware(requestCounter))
 	router.Use(middleware.CORSMiddleware())
 	router.Use(middleware.AuthMiddleware(logger))
 
@@ -34,7 +37,7 @@ func NewRouter(handler interactor.AppHandler, logger *logger.Logger) *gin.Engine
 	router.POST("/banProfile", handler.BanProfile)
 	router.POST("/IsInfluencerAndPrivate", handler.IsInfluencerAndPrivate)
 	router.POST("/getSearchInfo", handler.GetProfileInfo)
-
+	router.GET("/metrics", prometheus_middleware.PrometheusGinHandler())
 
 	return router
 }

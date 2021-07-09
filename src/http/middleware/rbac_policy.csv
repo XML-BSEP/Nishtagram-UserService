@@ -34,4 +34,5 @@ p, USER, /IsInfluencerAndPrivate, *
 p, AGENT, /IsInfluencerAndPrivate, *
 p, ANONYMOUS, /IsInfluencerAndPrivate, *
 p, ANONYMOUS, /getSearchInfo, *
+p, ANONYMOUS, /metrics, *
 

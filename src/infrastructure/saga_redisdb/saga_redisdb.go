@@ -12,7 +12,7 @@ func init_viper(logger *logger.Logger) {
 	if os.Getenv("DOCKER_ENV") != "" {
 		viper.SetConfigFile(`src/configurations/saga_redis.json`)
 	} else {
-		viper.SetConfigFile(`configurations/saga_redis.json`)
+		viper.SetConfigFile(`src/configurations/saga_redis.json`)
 	}
 	err := viper.ReadInConfig()
 	if err != nil {

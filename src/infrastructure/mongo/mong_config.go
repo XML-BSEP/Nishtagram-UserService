@@ -13,9 +13,9 @@ import (
 
 func init_viper() {
 	if os.Getenv("DOCKER_ENV") != "" {
-		viper.SetConfigFile(`configurations/mongo.json`)
+		viper.SetConfigFile(`src/configurations/mongo.json`)
 	} else {
-		viper.SetConfigFile(`configurations/mongo.json`)
+		viper.SetConfigFile(`src/configurations/mongo.json`)
 	}
 	err := viper.ReadInConfig()
 	if err != nil {
